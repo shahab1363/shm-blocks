@@ -30,7 +30,7 @@
 	}
 }
 
-// Base styles
+// Base styles - modeled after Cover block for consistent carousel behavior
 .wp-block-shm-poster {
 	--poster-overlay-color: #000;
 	--poster-overlay-color-rgb: 0, 0, 0;
@@ -41,30 +41,34 @@
 	--poster-transition-duration: 400ms;
 	--poster-transition-easing: ease-in-out;
 	--poster-content-delay: 100ms;
-	--poster-min-height: 400px;
+	--poster-min-height: 430px; // Match Cover block default
 	--poster-focal-x: 50%;
 	--poster-focal-y: 50%;
 
+	// Cover-like base properties
 	position: relative;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	align-items: stretch;
+	box-sizing: border-box;
 	overflow: hidden;
 	width: 100%;
-	height: 100%;
 	min-height: var(--poster-min-height);
 	background-color: #1a1a1a;
 
-	// Flex container support - allow block to fill parent
+	// Flex item support - allow block to fill parent
 	flex: 1 1 auto;
 	min-width: 0; // Prevent flex item overflow
 
 	&[style*="--poster-aspect-ratio"] {
 		aspect-ratio: var(--poster-aspect-ratio);
 		min-height: unset;
-		height: auto; // Let aspect-ratio control height
 	}
 }
 
 // Carousel/Slider container support
-// Ensures Poster fills slide containers properly (works for both flex and block layouts)
+// Uses absolute positioning like Cover block for reliable slide filling
 .wp-block-cb-slide-v2,
 .swiper-slide,
 .splide__slide,
@@ -73,11 +77,12 @@
 	// Ensure slides can contain absolutely positioned children
 	position: relative;
 
-	// Make Poster fill the slide when it's the direct child
+	// Make Poster fill the slide using absolute positioning (most reliable)
 	> .wp-block-shm-poster {
-		flex: 1 1 100%; // For flex containers
+		position: absolute;
+		inset: 0;
 		width: 100%;
-		height: 100%; // For block containers
+		height: 100%;
 		min-height: unset; // Override default min-height when in slides
 	}
 }

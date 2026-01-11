@@ -73,7 +73,7 @@
 
 		.wp-block-shm-poster-content-hover {
 			opacity: 0.3;
-			pointer-events: none;
+			z-index: 1;
 		}
 	}
 
@@ -82,12 +82,11 @@
 
 		.wp-block-shm-poster-content-default {
 			opacity: 0.3;
-			pointer-events: none;
+			z-index: 1;
 		}
 
 		.wp-block-shm-poster-content-hover {
 			opacity: 1;
-			pointer-events: auto;
 			z-index: 10;
 			height: var(--poster-overlay-height-hover);
 			outline: 2px dashed rgba(255, 255, 255, 0.5);
@@ -100,12 +99,11 @@
 
 		.wp-block-shm-poster-content-default {
 			opacity: 0;
-			pointer-events: none;
+			z-index: 1;
 		}
 
 		.wp-block-shm-poster-content-hover {
 			opacity: 1;
-			pointer-events: auto;
 			z-index: 10;
 			height: var(--poster-overlay-height-hover);
 		}
