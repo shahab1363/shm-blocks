@@ -2,7 +2,22 @@
  * Poster Block Editor Styles
  */
 
-// Child blocks base styles (must come before state-specific styles)
+// Mixin for active editing/preview state shared styles
+@mixin editor-active-hover-state {
+
+	.wp-block-shm-poster-content-hover {
+		opacity: 1;
+		z-index: 10;
+		height: var(--poster-overlay-height-hover);
+		justify-content: center;
+	}
+
+	.block-editor-block-list__layout {
+		justify-content: center;
+	}
+}
+
+// Child blocks base styles
 .wp-block-shm-poster-content-default,
 .wp-block-shm-poster-content-hover {
 
@@ -47,7 +62,7 @@
 	content: "Hover";
 }
 
-// Editor block wrapper (consolidated)
+// Editor block wrapper
 .wp-block-shm-poster {
 	min-height: var(--poster-min-height, 400px);
 
@@ -86,17 +101,11 @@
 		}
 
 		.wp-block-shm-poster-content-hover {
-			opacity: 1;
-			z-index: 10;
-			height: var(--poster-overlay-height-hover);
-			justify-content: center; // Center content when expanded
 			outline: 2px dashed rgba(255, 255, 255, 0.5);
 			outline-offset: -2px;
 		}
 
-		.block-editor-block-list__layout {
-			justify-content: center; // Center inner blocks layout too
-		}
+		@include editor-active-hover-state;
 	}
 
 	// Previewing hover state
@@ -107,16 +116,7 @@
 			z-index: 1;
 		}
 
-		.wp-block-shm-poster-content-hover {
-			opacity: 1;
-			z-index: 10;
-			height: var(--poster-overlay-height-hover);
-			justify-content: center; // Center content when expanded
-		}
-
-		.block-editor-block-list__layout {
-			justify-content: center; // Center inner blocks layout too
-		}
+		@include editor-active-hover-state;
 
 		.wp-block-shm-poster-content-default::before,
 		.wp-block-shm-poster-content-hover::before {

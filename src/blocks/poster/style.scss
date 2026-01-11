@@ -30,6 +30,36 @@
 	}
 }
 
+// Mixin for content animation base styles
+@mixin content-animation-base($transform: null) {
+
+	.wp-block-shm-poster-content-hover > * {
+		opacity: 0;
+
+		@if $transform {
+			transform: $transform;
+			transition:
+				opacity var(--poster-transition-duration) var(--poster-transition-easing),
+				transform var(--poster-transition-duration) var(--poster-transition-easing);
+		} @else {
+			transition: opacity var(--poster-transition-duration) var(--poster-transition-easing);
+		}
+	}
+
+	@include poster-active-state {
+
+		.wp-block-shm-poster-content-hover > * {
+			opacity: 1;
+
+			@if $transform {
+				transform: none;
+			}
+
+			transition-delay: var(--poster-content-delay);
+		}
+	}
+}
+
 // Base styles - modeled after Cover block for consistent carousel behavior
 .wp-block-shm-poster {
 	--poster-overlay-color: #000;
@@ -70,12 +100,13 @@
 
 // Make parent flex items stretch when containing a Poster block
 // This ensures Poster matches sibling heights in carousels/sliders
+// stylelint-disable-next-line no-descending-specificity
+*:has(> .wp-block-shm-poster),
 .swiper-slide:has(.wp-block-shm-poster),
 .splide__slide:has(.wp-block-shm-poster),
 .glide__slide:has(.wp-block-shm-poster),
 .slick-slide:has(.wp-block-shm-poster),
-.flickity-slider > *:has(.wp-block-shm-poster),
-*:has(> .wp-block-shm-poster) {
+.flickity-slider > *:has(.wp-block-shm-poster) {
 	align-self: stretch;
 }
 
@@ -188,12 +219,8 @@
 // Position: Top
 .wp-block-shm-poster--position-top {
 
-	.wp-block-shm-poster-content-default {
-		top: 0;
-		bottom: auto;
-		justify-content: flex-start;
-	}
-
+	// stylelint-disable-next-line no-descending-specificity
+	.wp-block-shm-poster-content-default,
 	.wp-block-shm-poster-content-hover {
 		top: 0;
 		bottom: auto;
@@ -201,8 +228,7 @@
 	}
 
 	// Override: center hover content when active
-	&:hover,
-	&.is-touched {
+	@include poster-active-state {
 
 		.wp-block-shm-poster-content-hover {
 			justify-content: center;
@@ -348,63 +374,19 @@
 // Content Animation: Fade-Up
 .wp-block-shm-poster--content-fade-up {
 
-	// stylelint-disable-next-line no-descending-specificity
-	.wp-block-shm-poster-content-hover > * {
-		opacity: 0;
-		transform: translateY(20px);
-		transition:
-			opacity var(--poster-transition-duration) var(--poster-transition-easing),
-			transform var(--poster-transition-duration) var(--poster-transition-easing);
-	}
-
-	@include poster-active-state {
-
-		.wp-block-shm-poster-content-hover > * {
-			opacity: 1;
-			transform: translateY(0);
-			transition-delay: var(--poster-content-delay);
-		}
-	}
+	@include content-animation-base(translateY(20px));
 }
 
 // Content Animation: Fade
 .wp-block-shm-poster--content-fade {
 
-	// stylelint-disable-next-line no-descending-specificity
-	.wp-block-shm-poster-content-hover > * {
-		opacity: 0;
-		transition: opacity var(--poster-transition-duration) var(--poster-transition-easing);
-	}
-
-	@include poster-active-state {
-
-		.wp-block-shm-poster-content-hover > * {
-			opacity: 1;
-			transition-delay: var(--poster-content-delay);
-		}
-	}
+	@include content-animation-base;
 }
 
 // Content Animation: Scale
 .wp-block-shm-poster--content-scale {
 
-	// stylelint-disable-next-line no-descending-specificity
-	.wp-block-shm-poster-content-hover > * {
-		opacity: 0;
-		transform: scale(0.9);
-		transition:
-			opacity var(--poster-transition-duration) var(--poster-transition-easing),
-			transform var(--poster-transition-duration) var(--poster-transition-easing);
-	}
-
-	@include poster-active-state {
-
-		.wp-block-shm-poster-content-hover > * {
-			opacity: 1;
-			transform: scale(1);
-			transition-delay: var(--poster-content-delay);
-		}
-	}
+	@include content-animation-base(scale(0.9));
 }
 
 // Content Animation: Stagger
