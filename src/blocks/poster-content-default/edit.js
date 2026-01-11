@@ -23,16 +23,15 @@ const ALLOWED_BLOCKS = [
  * Default template for initial content
  */
 const TEMPLATE = [
-	[ 'core/heading', { level: 3, placeholder: __( 'Title...', 'shm-blocks' ) } ],
+	[ 'core/heading', { level: 3, placeholder: __( 'Title…', 'shm-blocks' ) } ],
 ];
 
 /**
  * Edit component for Poster Default Content block
  *
- * @param {Object} props Block props
  * @return {JSX.Element} Block edit component
  */
-export default function Edit( props ) {
+export default function Edit() {
 	const blockProps = useBlockProps( {
 		className: 'shm-poster__content shm-poster__content--default',
 	} );

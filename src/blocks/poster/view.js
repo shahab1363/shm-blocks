@@ -5,6 +5,8 @@
  * On touch devices, first tap shows the hover state, second tap navigates.
  */
 
+/* global navigator, MutationObserver */
+
 ( function () {
 	'use strict';
 
@@ -18,6 +20,21 @@
 			'ontouchstart' in window ||
 			navigator.maxTouchPoints > 0 ||
 			navigator.msMaxTouchPoints > 0
+		);
+	}
+
+	/**
+	 * Check if a link element has a valid navigation URL
+	 *
+	 * @param {Element} link The link element to check
+	 * @return {boolean} True if the link has a valid URL
+	 */
+	function hasValidLink( link ) {
+		return (
+			link &&
+			link.getAttribute( 'href' ) &&
+			link.getAttribute( 'href' ) !== '#' &&
+			! link.hasAttribute( 'data-no-link' )
 		);
 	}
 
@@ -38,14 +55,18 @@
 
 		// Track which poster is currently "touched" (showing hover state)
 		let activePoster = null;
+		// Track if this is the first tap on the current active poster
+		let isFirstTapComplete = false;
 
 		posters.forEach( ( poster ) => {
+			// Skip if already initialized
+			if ( poster.hasAttribute( 'data-touch-initialized' ) ) {
+				return;
+			}
+			poster.setAttribute( 'data-touch-initialized', 'true' );
+
 			const link = poster.querySelector( '.shm-poster__link' );
-			const hasLink =
-				link &&
-				link.getAttribute( 'href' ) &&
-				link.getAttribute( 'href' ) !== '#' &&
-				! link.hasAttribute( 'data-no-link' );
+			const hasLink = hasValidLink( link );
 
 			// Handle touch start
 			poster.addEventListener(
@@ -64,9 +85,9 @@
 						// Activate this poster
 						poster.classList.add( 'is-touched' );
 						activePoster = poster;
+						isFirstTapComplete = false;
 					}
-					// If this poster is already active, let the touch proceed normally
-					// This allows the second tap to navigate
+					// If this poster is already active, the touchend will handle navigation
 				},
 				{ passive: false }
 			);
@@ -75,23 +96,33 @@
 			poster.addEventListener( 'touchend', ( e ) => {
 				// If this poster is active and has a valid link
 				if ( activePoster === poster && hasLink ) {
-					// Check if we're tapping on the same poster that's already active
-					// This is the "second tap" - navigate to the link
-					const touchedOnActive = poster.classList.contains( 'is-touched' );
+					// Check if this is the second tap (first tap is complete)
+					if ( isFirstTapComplete ) {
+						// This is the second tap - navigate to the link
+						e.preventDefault();
 
-					if ( touchedOnActive ) {
 						// Small delay to ensure the visual state is seen before navigation
-						// This is optional but provides better UX
 						setTimeout( () => {
 							const href = link.getAttribute( 'href' );
 							const target = link.getAttribute( 'target' );
 
 							if ( target === '_blank' ) {
-								window.open( href, '_blank', 'noopener,noreferrer' );
+								const newWindow = window.open(
+									href,
+									'_blank',
+									'noopener,noreferrer'
+								);
+								// If popup was blocked, fall back to same-window navigation
+								if ( ! newWindow ) {
+									window.location.href = href;
+								}
 							} else {
 								window.location.href = href;
 							}
 						}, 100 );
+					} else {
+						// This is the end of the first tap - mark it complete
+						isFirstTapComplete = true;
 					}
 				}
 			} );
@@ -104,6 +135,7 @@
 				if ( activePoster && ! activePoster.contains( e.target ) ) {
 					activePoster.classList.remove( 'is-touched' );
 					activePoster = null;
+					isFirstTapComplete = false;
 				}
 			},
 			{ passive: true }
@@ -111,6 +143,12 @@
 
 		// Handle keyboard navigation for accessibility
 		posters.forEach( ( poster ) => {
+			// Skip if already initialized for keyboard
+			if ( poster.hasAttribute( 'data-keyboard-initialized' ) ) {
+				return;
+			}
+			poster.setAttribute( 'data-keyboard-initialized', 'true' );
+
 			const link = poster.querySelector( '.shm-poster__link' );
 
 			if ( link ) {
@@ -124,11 +162,11 @@
 					poster.classList.remove( 'is-focused' );
 				} );
 
-				// Handle Enter/Space key
+				// Prevent spacebar from scrolling the page when link is focused
 				link.addEventListener( 'keydown', ( e ) => {
-					if ( e.key === 'Enter' || e.key === ' ' ) {
-						// Let the default link behavior handle navigation
-						// The CSS :focus-visible state will show the hover content
+					if ( e.key === ' ' ) {
+						e.preventDefault();
+						link.click();
 					}
 				} );
 			}
@@ -151,7 +189,9 @@
 					mutation.addedNodes.forEach( ( node ) => {
 						if (
 							node.nodeType === 1 &&
-							( node.classList?.contains( 'wp-block-shm-poster' ) ||
+							( node.classList?.contains(
+								'wp-block-shm-poster'
+							) ||
 								node.querySelector?.( '.wp-block-shm-poster' ) )
 						) {
 							initPosterBlocks();
@@ -161,9 +201,22 @@
 			} );
 		} );
 
-		observer.observe( document.body, {
-			childList: true,
-			subtree: true,
-		} );
+		// Ensure body exists before observing
+		if ( document.body ) {
+			observer.observe( document.body, {
+				childList: true,
+				subtree: true,
+			} );
+		} else {
+			// Body doesn't exist yet - wait for DOMContentLoaded
+			document.addEventListener( 'DOMContentLoaded', () => {
+				if ( document.body ) {
+					observer.observe( document.body, {
+						childList: true,
+						subtree: true,
+					} );
+				}
+			} );
+		}
 	}
 } )();

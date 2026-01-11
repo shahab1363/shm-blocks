@@ -1,40 +1,79 @@
 name: Build Release
 
 on:
-  release:
-    types: [published]
+    release:
+        types: [published]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+    build:
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '20'
+                  cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+            - name: Install dependencies
+              run: npm ci
 
-      - name: Build production assets
-        run: npm run build
+            - name: Build production assets
+              run: npm run build
 
-      - name: Create plugin ZIP
-        run: |
-          mkdir -p shm-blocks
-          cp -r build shm-blocks/
-          cp shm-blocks.php shm-blocks/
-          cp README.md shm-blocks/
-          zip -r shm-blocks.zip shm-blocks
+            - name: Verify build output
+              run: |
+                  echo "Verifying build output..."
 
-      - name: Upload release asset
-        uses: softprops/action-gh-release@v2
-        with:
-          files: shm-blocks.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  # Check that main block directory exists
+                  if [ ! -d "build/blocks/poster" ]; then
+                    echo "ERROR: Build directory missing expected block output (build/blocks/poster)"
+                    exit 1
+                  fi
+
+                  # Check that main block JavaScript exists
+                  if [ ! -f "build/blocks/poster/index.js" ]; then
+                    echo "ERROR: Main block JavaScript not found (build/blocks/poster/index.js)"
+                    exit 1
+                  fi
+
+                  # Check that child blocks exist
+                  if [ ! -d "build/blocks/poster-content-default" ]; then
+                    echo "ERROR: Child block missing (build/blocks/poster-content-default)"
+                    exit 1
+                  fi
+
+                  if [ ! -d "build/blocks/poster-content-hover" ]; then
+                    echo "ERROR: Child block missing (build/blocks/poster-content-hover)"
+                    exit 1
+                  fi
+
+                  # Check that block.json files exist
+                  if [ ! -f "build/blocks/poster/block.json" ]; then
+                    echo "ERROR: block.json missing for poster block"
+                    exit 1
+                  fi
+
+                  echo "Build verification passed!"
+
+            - name: Create plugin ZIP
+              run: |
+                  mkdir -p shm-blocks
+                  cp -r build shm-blocks/
+                  cp shm-blocks.php shm-blocks/
+                  if [ -f README.md ]; then
+                    cp README.md shm-blocks/
+                  else
+                    echo "WARNING: README.md not found, skipping"
+                  fi
+                  zip -r shm-blocks.zip shm-blocks
+
+            - name: Upload release asset
+              uses: softprops/action-gh-release@v2
+              with:
+                  files: shm-blocks.zip
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

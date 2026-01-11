@@ -9,6 +9,7 @@ import {
 	BlockControls,
 	MediaUpload,
 	MediaUploadCheck,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalLinkControl as LinkControl,
 } from '@wordpress/block-editor';
 import {
@@ -23,27 +24,14 @@ import {
 	ToolbarGroup,
 	ToolbarButton,
 	Popover,
-	__experimentalUnitControl as UnitControl,
 } from '@wordpress/components';
 import { useState } from '@wordpress/element';
-import { link, image, edit } from '@wordpress/icons';
+import { link, image } from '@wordpress/icons';
 
 /**
- * Helper to convert hex to RGB values
- *
- * @param {string} hex Hex color value
- * @return {Object} RGB values
+ * Internal dependencies
  */
-function hexToRgb( hex ) {
-	const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec( hex );
-	return result
-		? {
-				r: parseInt( result[ 1 ], 16 ),
-				g: parseInt( result[ 2 ], 16 ),
-				b: parseInt( result[ 3 ], 16 ),
-		  }
-		: { r: 0, g: 0, b: 0 };
-}
+import { buildCustomStyles } from './utils';
 
 /**
  * Template for inner blocks
@@ -96,10 +84,12 @@ const POSITION_OPTIONS = [
 /**
  * Edit component for Poster block
  *
- * @param {Object} props Block props
+ * @param {Object}   props               Block props.
+ * @param {Object}   props.attributes    Block attributes.
+ * @param {Function} props.setAttributes Function to set attributes.
  * @return {JSX.Element} Block edit component
  */
-export default function Edit( { attributes, setAttributes, clientId } ) {
+export default function Edit( { attributes, setAttributes } ) {
 	const {
 		mediaId,
 		mediaUrl,
@@ -107,49 +97,17 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 		imageAlt,
 		linkUrl,
 		linkTarget,
-		linkRel,
-		overlayColor,
 		overlayPosition,
-		overlayOpacity,
-		overlayOpacityHover,
-		overlayHeight,
-		overlayHeightHover,
 		animationType,
 		contentAnimationType,
-		transitionDuration,
-		contentAnimationDelay,
-		transitionEasing,
-		minHeight,
-		aspectRatio,
 		editingState,
 	} = attributes;
 
 	const [ isLinkPopoverOpen, setIsLinkPopoverOpen ] = useState( false );
 	const [ isPreviewingHover, setIsPreviewingHover ] = useState( false );
 
-	// Convert hex color to RGB for CSS custom properties
-	const rgb = hexToRgb( overlayColor );
-	const overlayColorRgb = `${ rgb.r }, ${ rgb.g }, ${ rgb.b }`;
-
-	// Build CSS custom properties
-	const customStyles = {
-		'--poster-overlay-color': overlayColor,
-		'--poster-overlay-color-rgb': overlayColorRgb,
-		'--poster-overlay-opacity': overlayOpacity / 100,
-		'--poster-overlay-opacity-hover': overlayOpacityHover / 100,
-		'--poster-overlay-height': overlayHeight,
-		'--poster-overlay-height-hover': overlayHeightHover,
-		'--poster-transition-duration': `${ transitionDuration }ms`,
-		'--poster-transition-easing': transitionEasing,
-		'--poster-content-delay': `${ contentAnimationDelay }ms`,
-		'--poster-min-height': minHeight,
-		'--poster-focal-x': `${ focalPoint.x * 100 }%`,
-		'--poster-focal-y': `${ focalPoint.y * 100 }%`,
-	};
-
-	if ( aspectRatio ) {
-		customStyles[ '--poster-aspect-ratio' ] = aspectRatio;
-	}
+	// Build CSS custom properties using shared utility
+	const customStyles = buildCustomStyles( attributes );
 
 	// Build class names
 	const classNames = [
@@ -195,7 +153,9 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 			<BlockControls>
 				<ToolbarGroup>
 					<ToolbarButton
-						icon={ editingState === 'default' ? 'visibility' : 'hidden' }
+						icon={
+							editingState === 'default' ? 'visibility' : 'hidden'
+						}
 						label={
 							editingState === 'default'
 								? __( 'Editing Default State', 'shm-blocks' )
@@ -204,7 +164,9 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 						onClick={ () =>
 							setAttributes( {
 								editingState:
-									editingState === 'default' ? 'hover' : 'default',
+									editingState === 'default'
+										? 'hover'
+										: 'default',
 							} )
 						}
 						isPressed={ editingState === 'hover' }
@@ -216,7 +178,9 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 					<ToolbarButton
 						icon="controls-play"
 						label={ __( 'Preview Hover State', 'shm-blocks' ) }
-						onClick={ () => setIsPreviewingHover( ! isPreviewingHover ) }
+						onClick={ () =>
+							setIsPreviewingHover( ! isPreviewingHover )
+						}
 						isPressed={ isPreviewingHover }
 					/>
 				</ToolbarGroup>
@@ -238,7 +202,9 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 					<ToolbarButton
 						icon={ link }
 						label={ __( 'Edit Link', 'shm-blocks' ) }
-						onClick={ () => setIsLinkPopoverOpen( ! isLinkPopoverOpen ) }
+						onClick={ () =>
+							setIsLinkPopoverOpen( ! isLinkPopoverOpen )
+						}
 						isPressed={ isLinkPopoverOpen || !! linkUrl }
 					/>
 					{ isLinkPopoverOpen && (
@@ -248,7 +214,9 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 							anchor={ blockProps.ref?.current }
 							focusOnMount="firstElement"
 						>
-							<div style={ { padding: '16px', minWidth: '300px' } }>
+							<div
+								style={ { padding: '16px', minWidth: '300px' } }
+							>
 								<LinkControl
 									value={ {
 										url: linkUrl,
@@ -296,7 +264,10 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 												onClick={ open }
 												style={ { marginRight: '8px' } }
 											>
-												{ __( 'Replace Image', 'shm-blocks' ) }
+												{ __(
+													'Replace Image',
+													'shm-blocks'
+												) }
 											</Button>
 											<Button
 												variant="tertiary"
@@ -312,8 +283,14 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 											</Button>
 										</>
 									) : (
-										<Button variant="primary" onClick={ open }>
-											{ __( 'Select Image', 'shm-blocks' ) }
+										<Button
+											variant="primary"
+											onClick={ open }
+										>
+											{ __(
+												'Select Image',
+												'shm-blocks'
+											) }
 										</Button>
 									) }
 								</div>
@@ -352,7 +329,9 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 					<TextControl
 						label={ __( 'URL', 'shm-blocks' ) }
 						value={ linkUrl }
-						onChange={ ( value ) => setAttributes( { linkUrl: value } ) }
+						onChange={ ( value ) =>
+							setAttributes( { linkUrl: value } )
+						}
 						placeholder="https://"
 					/>
 					<ToggleControl
@@ -373,7 +352,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 				>
 					<p>{ __( 'Overlay Color', 'shm-blocks' ) }</p>
 					<ColorPicker
-						color={ overlayColor }
+						color={ attributes.overlayColor }
 						onChange={ ( value ) =>
 							setAttributes( { overlayColor: value } )
 						}
@@ -389,7 +368,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 					/>
 					<RangeControl
 						label={ __( 'Default Opacity (%)', 'shm-blocks' ) }
-						value={ overlayOpacity }
+						value={ attributes.overlayOpacity }
 						onChange={ ( value ) =>
 							setAttributes( { overlayOpacity: value } )
 						}
@@ -398,7 +377,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 					/>
 					<RangeControl
 						label={ __( 'Hover Opacity (%)', 'shm-blocks' ) }
-						value={ overlayOpacityHover }
+						value={ attributes.overlayOpacityHover }
 						onChange={ ( value ) =>
 							setAttributes( { overlayOpacityHover: value } )
 						}
@@ -407,7 +386,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 					/>
 					<TextControl
 						label={ __( 'Default Height', 'shm-blocks' ) }
-						value={ overlayHeight }
+						value={ attributes.overlayHeight }
 						onChange={ ( value ) =>
 							setAttributes( { overlayHeight: value } )
 						}
@@ -415,7 +394,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 					/>
 					<TextControl
 						label={ __( 'Hover Height', 'shm-blocks' ) }
-						value={ overlayHeightHover }
+						value={ attributes.overlayHeightHover }
 						onChange={ ( value ) =>
 							setAttributes( { overlayHeightHover: value } )
 						}
@@ -434,7 +413,10 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 						onChange={ ( value ) =>
 							setAttributes( { animationType: value } )
 						}
-						help={ __( 'Animation style for the overlay panel.', 'shm-blocks' ) }
+						help={ __(
+							'Animation style for the overlay panel.',
+							'shm-blocks'
+						) }
 					/>
 					<SelectControl
 						label={ __( 'Content Animation', 'shm-blocks' ) }
@@ -443,11 +425,14 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 						onChange={ ( value ) =>
 							setAttributes( { contentAnimationType: value } )
 						}
-						help={ __( 'Animation style for content elements.', 'shm-blocks' ) }
+						help={ __(
+							'Animation style for content elements.',
+							'shm-blocks'
+						) }
 					/>
 					<RangeControl
 						label={ __( 'Transition Duration (ms)', 'shm-blocks' ) }
-						value={ transitionDuration }
+						value={ attributes.transitionDuration }
 						onChange={ ( value ) =>
 							setAttributes( { transitionDuration: value } )
 						}
@@ -456,8 +441,11 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 						step={ 50 }
 					/>
 					<RangeControl
-						label={ __( 'Content Animation Delay (ms)', 'shm-blocks' ) }
-						value={ contentAnimationDelay }
+						label={ __(
+							'Content Animation Delay (ms)',
+							'shm-blocks'
+						) }
+						value={ attributes.contentAnimationDelay }
 						onChange={ ( value ) =>
 							setAttributes( { contentAnimationDelay: value } )
 						}
@@ -467,7 +455,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 					/>
 					<SelectControl
 						label={ __( 'Easing Function', 'shm-blocks' ) }
-						value={ transitionEasing }
+						value={ attributes.transitionEasing }
 						options={ EASING_OPTIONS }
 						onChange={ ( value ) =>
 							setAttributes( { transitionEasing: value } )
@@ -481,13 +469,15 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 				>
 					<TextControl
 						label={ __( 'Minimum Height', 'shm-blocks' ) }
-						value={ minHeight }
-						onChange={ ( value ) => setAttributes( { minHeight: value } ) }
+						value={ attributes.minHeight }
+						onChange={ ( value ) =>
+							setAttributes( { minHeight: value } )
+						}
 						help={ __( 'E.g., 400px, 50vh', 'shm-blocks' ) }
 					/>
 					<SelectControl
 						label={ __( 'Aspect Ratio', 'shm-blocks' ) }
-						value={ aspectRatio || '' }
+						value={ attributes.aspectRatio || '' }
 						options={ [
 							{ label: __( 'None', 'shm-blocks' ), value: '' },
 							{ label: '16:9', value: '16/9' },
@@ -523,7 +513,10 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 										onClick={ open }
 										icon={ image }
 									>
-										{ __( 'Select Background Image', 'shm-blocks' ) }
+										{ __(
+											'Select Background Image',
+											'shm-blocks'
+										) }
 									</Button>
 								) }
 							/>

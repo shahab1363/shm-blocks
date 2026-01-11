@@ -23,12 +23,41 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return void
  */
 function shm_blocks_init() {
-	// Register the main poster block
-	register_block_type( __DIR__ . '/build/blocks/poster' );
+	$blocks = array(
+		'poster'                 => __DIR__ . '/build/blocks/poster',
+		'poster-content-default' => __DIR__ . '/build/blocks/poster-content-default',
+		'poster-content-hover'   => __DIR__ . '/build/blocks/poster-content-hover',
+	);
 
-	// Register child blocks
-	register_block_type( __DIR__ . '/build/blocks/poster-content-default' );
-	register_block_type( __DIR__ . '/build/blocks/poster-content-hover' );
+	foreach ( $blocks as $name => $path ) {
+		$result = register_block_type( $path );
+
+		if ( false === $result ) {
+			// Log error for debugging.
+			error_log(
+				sprintf(
+					'[SHM Blocks] Failed to register block "%s" from path: %s',
+					$name,
+					$path
+				)
+			);
+
+			// Show admin notice for failed block registration.
+			add_action(
+				'admin_notices',
+				function () use ( $name ) {
+					printf(
+						'<div class="notice notice-error"><p>%s</p></div>',
+						sprintf(
+							/* translators: %s: Block name */
+							esc_html__( 'SHM Blocks: Failed to register block "%s". Please ensure the plugin is built correctly.', 'shm-blocks' ),
+							esc_html( $name )
+						)
+					);
+				}
+			);
+		}
+	}
 }
 add_action( 'init', 'shm_blocks_init' );
 
