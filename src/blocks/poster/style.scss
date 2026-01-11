@@ -68,22 +68,20 @@
 }
 
 // Carousel/Slider container support
-// Uses absolute positioning like Cover block for reliable slide filling
+// Poster stays in normal document flow (like Cover block) and uses min-height
+// The carousel plugin will handle equalizing slide heights
 .wp-block-cb-slide-v2,
 .swiper-slide,
 .splide__slide,
 [class*="carousel"] [class*="slide"],
 [class*="slider"] [class*="slide"] {
-	// Ensure slides can contain absolutely positioned children
+	// Ensure slides can contain absolutely positioned children (for image/overlay)
 	position: relative;
 
-	// Make Poster fill the slide using absolute positioning (most reliable)
+	// Poster fills available space via flex
 	> .wp-block-shm-poster {
-		position: absolute;
-		inset: 0;
+		flex: 1 1 100%;
 		width: 100%;
-		height: 100%;
-		min-height: unset; // Override default min-height when in slides
 	}
 }
 

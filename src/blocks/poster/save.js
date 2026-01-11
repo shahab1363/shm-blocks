@@ -25,6 +25,7 @@ export default function save( { attributes } ) {
 		overlayPosition,
 		animationType,
 		contentAnimationType,
+		focalPoint,
 	} = attributes;
 
 	// Build CSS custom properties using shared utility
@@ -73,6 +74,16 @@ export default function save( { attributes } ) {
 		);
 	};
 
+	// Image styles - inline to ensure they work even if CSS fails to load
+	const imageStyles = {
+		position: 'absolute',
+		inset: 0,
+		width: '100%',
+		height: '100%',
+		objectFit: 'cover',
+		objectPosition: `${ ( focalPoint?.x ?? 0.5 ) * 100 }% ${ ( focalPoint?.y ?? 0.5 ) * 100 }%`,
+	};
+
 	return (
 		<div { ...blockProps }>
 			{ mediaUrl && (
@@ -81,6 +92,7 @@ export default function save( { attributes } ) {
 					src={ mediaUrl }
 					alt={ imageAlt || '' }
 					loading="lazy"
+					style={ imageStyles }
 				/>
 			) }
 			{ renderWrapper() }
