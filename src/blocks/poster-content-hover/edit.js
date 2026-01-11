@@ -1,20 +1,8 @@
 /**
- * WordPress dependencies
- */
-import {
-	useBlockProps,
-	InnerBlocks,
-	BlockControls,
-	AlignmentToolbar,
-} from '@wordpress/block-editor';
-
-/**
  * Internal dependencies
  */
-import {
-	ALLOWED_CONTENT_BLOCKS,
-	HOVER_CONTENT_TEMPLATE,
-} from '../poster/constants';
+import ContentEdit from '../poster/shared/content-edit.js';
+import { HOVER_CONTENT_TEMPLATE } from '../poster/constants.js';
 
 /**
  * Edit component for Poster Hover Content block
@@ -22,35 +10,15 @@ import {
  * @param {Object}   props               Block props.
  * @param {Object}   props.attributes    Block attributes.
  * @param {Function} props.setAttributes Function to set attributes.
- * @return {JSX.Element} Block edit component
+ * @return {JSX.Element} Block edit component.
  */
 export default function Edit( { attributes, setAttributes } ) {
-	const { textAlign } = attributes;
-
-	const blockProps = useBlockProps( {
-		className: 'shm-poster__content shm-poster__content--hover',
-		style: {
-			textAlign,
-		},
-	} );
-
 	return (
-		<>
-			<BlockControls>
-				<AlignmentToolbar
-					value={ textAlign }
-					onChange={ ( value ) =>
-						setAttributes( { textAlign: value } )
-					}
-				/>
-			</BlockControls>
-			<div { ...blockProps }>
-				<InnerBlocks
-					allowedBlocks={ ALLOWED_CONTENT_BLOCKS }
-					template={ HOVER_CONTENT_TEMPLATE }
-					templateLock={ false }
-				/>
-			</div>
-		</>
+		<ContentEdit
+			attributes={ attributes }
+			setAttributes={ setAttributes }
+			variant="hover"
+			template={ HOVER_CONTENT_TEMPLATE }
+		/>
 	);
 }
