@@ -119,3 +119,25 @@ function shm_blocks_register_category( $categories ) {
 	);
 }
 add_filter( 'block_categories_all', 'shm_blocks_register_category' );
+
+/**
+ * Add version query string to block styles based on file modification time.
+ *
+ * This ensures browser cache is invalidated when styles are updated.
+ *
+ * @param string $src    The source URL of the enqueued style.
+ * @param string $handle The style's registered handle.
+ * @return string Modified source URL with version parameter.
+ */
+function shm_blocks_style_version( $src, $handle ) {
+	// Target SHM block styles.
+	if ( strpos( $handle, 'shm-poster' ) !== false ) {
+		$file = __DIR__ . '/build/blocks/poster/style-index.css';
+		if ( file_exists( $file ) ) {
+			$version = filemtime( $file );
+			$src     = add_query_arg( 'ver', $version, $src );
+		}
+	}
+	return $src;
+}
+add_filter( 'style_loader_src', 'shm_blocks_style_version', 10, 2 );
