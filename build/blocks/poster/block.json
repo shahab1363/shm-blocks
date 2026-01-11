@@ -1,0 +1,134 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "shm/poster",
+  "version": "1.0.0",
+  "title": "Poster",
+  "category": "shm-blocks",
+  "description": "An interactive poster block with a background image and hover-triggered overlay animations.",
+  "keywords": [
+    "poster",
+    "cover",
+    "hover",
+    "card",
+    "image"
+  ],
+  "textdomain": "shm-blocks",
+  "attributes": {
+    "mediaId": {
+      "type": "number"
+    },
+    "mediaUrl": {
+      "type": "string"
+    },
+    "focalPoint": {
+      "type": "object",
+      "default": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "imageAlt": {
+      "type": "string",
+      "default": ""
+    },
+    "linkUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "linkTarget": {
+      "type": "string",
+      "default": "_self"
+    },
+    "linkRel": {
+      "type": "string",
+      "default": ""
+    },
+    "overlayColor": {
+      "type": "string",
+      "default": "#000000"
+    },
+    "overlayPosition": {
+      "type": "string",
+      "default": "bottom",
+      "enum": [
+        "bottom",
+        "top"
+      ]
+    },
+    "overlayOpacity": {
+      "type": "number",
+      "default": 60
+    },
+    "overlayOpacityHover": {
+      "type": "number",
+      "default": 80
+    },
+    "overlayHeight": {
+      "type": "string",
+      "default": "30%"
+    },
+    "overlayHeightHover": {
+      "type": "string",
+      "default": "100%"
+    },
+    "animationType": {
+      "type": "string",
+      "default": "slide",
+      "enum": [
+        "slide",
+        "fade",
+        "scale",
+        "blur",
+        "slide-fade"
+      ]
+    },
+    "contentAnimationType": {
+      "type": "string",
+      "default": "fade-up",
+      "enum": [
+        "fade-up",
+        "fade",
+        "scale",
+        "stagger"
+      ]
+    },
+    "transitionDuration": {
+      "type": "number",
+      "default": 400
+    },
+    "contentAnimationDelay": {
+      "type": "number",
+      "default": 100
+    },
+    "transitionEasing": {
+      "type": "string",
+      "default": "ease-in-out"
+    },
+    "minHeight": {
+      "type": "string",
+      "default": "400px"
+    },
+    "aspectRatio": {
+      "type": "string"
+    },
+    "editingState": {
+      "type": "string",
+      "default": "default"
+    }
+  },
+  "supports": {
+    "html": false,
+    "align": [
+      "wide",
+      "full"
+    ],
+    "spacing": {
+      "margin": true
+    }
+  },
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./editor.css",
+  "style": "file:./style.css",
+  "viewScript": "file:./view.js"
+}

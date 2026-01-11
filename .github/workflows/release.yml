@@ -1,0 +1,40 @@
+name: Build Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production assets
+        run: npm run build
+
+      - name: Create plugin ZIP
+        run: |
+          mkdir -p shm-blocks
+          cp -r build shm-blocks/
+          cp shm-blocks.php shm-blocks/
+          cp README.md shm-blocks/
+          zip -r shm-blocks.zip shm-blocks
+
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: shm-blocks.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

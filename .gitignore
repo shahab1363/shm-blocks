@@ -35,6 +35,21 @@ wp-config.php
 # htaccess
 /.htaccess
 
+# Claude Code - local settings (personal, not shared)
+.claude/settings.local.json
+
+# Dev Container / Docker
+.devcontainer/*.log
+
+# WordPress local environment (wp-env)
+.wp-env/
+
+# Node.js
+node_modules/
+
+# macOS
+.DS_Store
+
 # All plugins
 #
 # Note: If you wish to whitelist plugins,
