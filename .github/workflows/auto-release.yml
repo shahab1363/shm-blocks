@@ -5,7 +5,6 @@ on:
         branches:
             - main
         paths-ignore:
-            - '.github/workflows/**'
             - '*.md'
 
 permissions:
@@ -80,6 +79,59 @@ jobs:
               run: |
                   sed -i "s/Version:           .*/Version:           $NEW_VERSION/" shm-blocks.php
 
+            - name: Install dependencies
+              if: steps.check_skip.outputs.skip != 'true'
+              run: npm ci
+
+            - name: Build production assets
+              if: steps.check_skip.outputs.skip != 'true'
+              run: npm run build
+
+            - name: Verify build output
+              if: steps.check_skip.outputs.skip != 'true'
+              run: |
+                  echo "Verifying build output..."
+
+                  if [ ! -d "build/blocks/poster" ]; then
+                    echo "ERROR: Build directory missing expected block output (build/blocks/poster)"
+                    exit 1
+                  fi
+
+                  if [ ! -f "build/blocks/poster/index.js" ]; then
+                    echo "ERROR: Main block JavaScript not found (build/blocks/poster/index.js)"
+                    exit 1
+                  fi
+
+                  if [ ! -d "build/blocks/poster-content-default" ]; then
+                    echo "ERROR: Child block missing (build/blocks/poster-content-default)"
+                    exit 1
+                  fi
+
+                  if [ ! -d "build/blocks/poster-content-hover" ]; then
+                    echo "ERROR: Child block missing (build/blocks/poster-content-hover)"
+                    exit 1
+                  fi
+
+                  if [ ! -f "build/blocks/poster/block.json" ]; then
+                    echo "ERROR: block.json missing for poster block"
+                    exit 1
+                  fi
+
+                  echo "Build verification passed!"
+
+            - name: Create plugin ZIP
+              if: steps.check_skip.outputs.skip != 'true'
+              env:
+                  VERSION: ${{ steps.bump_version.outputs.new_version }}
+              run: |
+                  mkdir -p shm-blocks
+                  cp -r build shm-blocks/
+                  cp shm-blocks.php shm-blocks/
+                  if [ -f README.md ]; then
+                    cp README.md shm-blocks/
+                  fi
+                  zip -r "shm-blocks-${VERSION}.zip" shm-blocks
+
             - name: Configure git
               if: steps.check_skip.outputs.skip != 'true'
               run: |
@@ -136,5 +188,6 @@ jobs:
                   body_path: release_notes.md
                   draft: false
                   prerelease: false
+                  files: shm-blocks-${{ steps.bump_version.outputs.new_version }}.zip
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
