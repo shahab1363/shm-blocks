@@ -8,7 +8,11 @@
 	"description": "Content shown in the default (non-hover) state of a Poster block.",
 	"parent": [ "shm/poster" ],
 	"textdomain": "shm-blocks",
-	"attributes": {},
+	"attributes": {
+		"textAlign": {
+			"type": "string"
+		}
+	},
 	"supports": {
 		"html": false,
 		"reusable": false,
@@ -20,7 +24,11 @@
 		},
 		"typography": {
 			"fontSize": true,
-			"lineHeight": true
+			"lineHeight": true,
+			"fontWeight": true,
+			"fontStyle": true,
+			"letterSpacing": true,
+			"textTransform": true
 		},
 		"spacing": {
 			"padding": true,
