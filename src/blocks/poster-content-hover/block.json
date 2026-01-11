@@ -1,0 +1,31 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "shm/poster-content-hover",
+	"version": "1.0.0",
+	"title": "Poster Hover Content",
+	"category": "shm-blocks",
+	"description": "Content shown in the hover state of a Poster block.",
+	"parent": [ "shm/poster" ],
+	"textdomain": "shm-blocks",
+	"attributes": {},
+	"supports": {
+		"html": false,
+		"reusable": false,
+		"inserter": false,
+		"color": {
+			"text": true,
+			"background": false,
+			"link": true
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true
+		},
+		"spacing": {
+			"padding": true,
+			"margin": false
+		}
+	},
+	"editorScript": "file:./index.js"
+}
