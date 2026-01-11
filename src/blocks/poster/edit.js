@@ -25,13 +25,20 @@ import {
 	ToolbarButton,
 	Popover,
 } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { useState, useRef } from '@wordpress/element';
 import { link, image } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
 import { buildCustomStyles } from './utils';
+import {
+	ANIMATION_TYPES,
+	CONTENT_ANIMATION_TYPES,
+	EASING_OPTIONS,
+	POSITION_OPTIONS,
+	ASPECT_RATIO_OPTIONS,
+} from './constants';
 
 /**
  * Template for inner blocks
@@ -39,46 +46,6 @@ import { buildCustomStyles } from './utils';
 const TEMPLATE = [
 	[ 'shm/poster-content-default', {} ],
 	[ 'shm/poster-content-hover', {} ],
-];
-
-/**
- * Block option configurations
- */
-const ANIMATION_TYPES = [
-	{ label: __( 'Slide', 'shm-blocks' ), value: 'slide' },
-	{ label: __( 'Fade', 'shm-blocks' ), value: 'fade' },
-	{ label: __( 'Scale', 'shm-blocks' ), value: 'scale' },
-	{ label: __( 'Blur', 'shm-blocks' ), value: 'blur' },
-	{ label: __( 'Slide & Fade', 'shm-blocks' ), value: 'slide-fade' },
-];
-
-const CONTENT_ANIMATION_TYPES = [
-	{ label: __( 'Fade Up', 'shm-blocks' ), value: 'fade-up' },
-	{ label: __( 'Fade', 'shm-blocks' ), value: 'fade' },
-	{ label: __( 'Scale', 'shm-blocks' ), value: 'scale' },
-	{ label: __( 'Stagger', 'shm-blocks' ), value: 'stagger' },
-];
-
-const EASING_OPTIONS = [
-	{ label: __( 'Ease', 'shm-blocks' ), value: 'ease' },
-	{ label: __( 'Ease In', 'shm-blocks' ), value: 'ease-in' },
-	{ label: __( 'Ease Out', 'shm-blocks' ), value: 'ease-out' },
-	{ label: __( 'Ease In Out', 'shm-blocks' ), value: 'ease-in-out' },
-	{ label: __( 'Linear', 'shm-blocks' ), value: 'linear' },
-];
-
-const POSITION_OPTIONS = [
-	{ label: __( 'Bottom', 'shm-blocks' ), value: 'bottom' },
-	{ label: __( 'Top', 'shm-blocks' ), value: 'top' },
-];
-
-const ASPECT_RATIO_OPTIONS = [
-	{ label: __( 'None', 'shm-blocks' ), value: '' },
-	{ label: '16:9', value: '16/9' },
-	{ label: '4:3', value: '4/3' },
-	{ label: '1:1', value: '1/1' },
-	{ label: '3:4', value: '3/4' },
-	{ label: '9:16', value: '9/16' },
 ];
 
 /**
@@ -100,11 +67,14 @@ export default function Edit( { attributes, setAttributes } ) {
 		overlayPosition,
 		animationType,
 		contentAnimationType,
-		editingState,
 	} = attributes;
 
 	const [ isLinkPopoverOpen, setIsLinkPopoverOpen ] = useState( false );
 	const [ isPreviewingHover, setIsPreviewingHover ] = useState( false );
+	const [ editingState, setEditingState ] = useState( 'default' );
+
+	const linkButtonRef = useRef( null );
+	const isDefaultState = editingState === 'default';
 
 	const customStyles = buildCustomStyles( attributes );
 
@@ -113,7 +83,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		`wp-block-shm-poster--animation-${ animationType }`,
 		`wp-block-shm-poster--content-${ contentAnimationType }`,
 		`wp-block-shm-poster--position-${ overlayPosition }`,
-		editingState === 'hover' ? 'is-editing-hover' : 'is-editing-default',
+		isDefaultState ? 'is-editing-default' : 'is-editing-hover',
 		isPreviewingHover && 'is-previewing-hover',
 	]
 		.filter( Boolean )
@@ -146,9 +116,7 @@ export default function Edit( { attributes, setAttributes } ) {
 	}
 
 	function toggleEditingState() {
-		setAttributes( {
-			editingState: editingState === 'default' ? 'hover' : 'default',
-		} );
+		setEditingState( editingState === 'default' ? 'hover' : 'default' );
 	}
 
 	function clearLink() {
@@ -171,18 +139,16 @@ export default function Edit( { attributes, setAttributes } ) {
 			<BlockControls>
 				<ToolbarGroup>
 					<ToolbarButton
-						icon={
-							editingState === 'default' ? 'visibility' : 'hidden'
-						}
+						icon={ isDefaultState ? 'visibility' : 'hidden' }
 						label={
-							editingState === 'default'
+							isDefaultState
 								? __( 'Editing Default State', 'shm-blocks' )
 								: __( 'Editing Hover State', 'shm-blocks' )
 						}
 						onClick={ toggleEditingState }
-						isPressed={ editingState === 'hover' }
+						isPressed={ ! isDefaultState }
 					>
-						{ editingState === 'default'
+						{ isDefaultState
 							? __( 'Default', 'shm-blocks' )
 							: __( 'Hover', 'shm-blocks' ) }
 					</ToolbarButton>
@@ -211,6 +177,7 @@ export default function Edit( { attributes, setAttributes } ) {
 						/>
 					</MediaUploadCheck>
 					<ToolbarButton
+						ref={ linkButtonRef }
 						icon={ link }
 						label={ __( 'Edit Link', 'shm-blocks' ) }
 						onClick={ () =>
@@ -222,7 +189,7 @@ export default function Edit( { attributes, setAttributes } ) {
 						<Popover
 							position="bottom center"
 							onClose={ () => setIsLinkPopoverOpen( false ) }
-							anchor={ blockProps.ref?.current }
+							anchor={ linkButtonRef.current }
 							focusOnMount="firstElement"
 						>
 							<div
@@ -258,7 +225,7 @@ export default function Edit( { attributes, setAttributes } ) {
 										<>
 											<img
 												src={ mediaUrl }
-												alt={ imageAlt }
+												alt={ imageAlt || '' }
 												style={ {
 													maxWidth: '100%',
 													marginBottom: '8px',
@@ -491,7 +458,7 @@ export default function Edit( { attributes, setAttributes } ) {
 					<img
 						className="shm-poster__image"
 						src={ mediaUrl }
-						alt={ imageAlt }
+						alt={ imageAlt || '' }
 					/>
 				) : (
 					<div className="shm-poster__placeholder">

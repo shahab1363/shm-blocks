@@ -91,7 +91,8 @@ The poster block attributes are defined in `src/blocks/poster/block.json`:
 - **Overlay**: `overlayColor`, `overlayPosition`, `overlayOpacity`, `overlayOpacityHover`, `overlayHeight`, `overlayHeightHover`
 - **Animation**: `animationType`, `contentAnimationType`, `transitionDuration`, `contentAnimationDelay`, `transitionEasing`
 - **Dimensions**: `minHeight`, `aspectRatio`
-- **Editor State**: `editingState` (not saved to post content)
+
+Note: `editingState` is managed as React component state in `edit.js`, not as a block attribute.
 
 ## Releases
 

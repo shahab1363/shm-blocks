@@ -2,6 +2,34 @@
  * Poster Block Styles - Frontend and editor shared
  */
 
+// Mixin for hover/touch active states
+@mixin poster-active-state {
+
+	&:hover,
+	&.is-touched {
+		@content;
+	}
+}
+
+// Common styles for hiding default content in active state
+@mixin hide-default-content {
+
+	.wp-block-shm-poster-content-default {
+		opacity: 0;
+		pointer-events: none;
+	}
+}
+
+// Common styles for showing hover content in active state
+@mixin show-hover-content {
+
+	.wp-block-shm-poster-content-hover {
+		opacity: 1;
+		pointer-events: auto;
+		z-index: 3;
+	}
+}
+
 // Base styles
 .wp-block-shm-poster {
 	--poster-overlay-color: #000;
@@ -141,13 +169,9 @@
 // Animation: Slide (default)
 .wp-block-shm-poster--animation-slide {
 
-	&:hover,
-	&.is-touched {
+	@include poster-active-state {
 
-		.wp-block-shm-poster-content-default {
-			opacity: 0;
-			pointer-events: none;
-		}
+		@include hide-default-content;
 
 		.wp-block-shm-poster-content-hover {
 			height: var(--poster-overlay-height-hover);
@@ -168,19 +192,10 @@
 		height: auto;
 	}
 
-	&:hover,
-	&.is-touched {
+	@include poster-active-state {
 
-		.wp-block-shm-poster-content-default {
-			opacity: 0;
-			pointer-events: none;
-		}
-
-		.wp-block-shm-poster-content-hover {
-			opacity: 1;
-			pointer-events: auto;
-			z-index: 3;
-		}
+		@include hide-default-content;
+		@include show-hover-content;
 	}
 }
 
@@ -207,13 +222,9 @@
 		}
 	}
 
-	&:hover,
-	&.is-touched {
+	@include poster-active-state {
 
-		.wp-block-shm-poster-content-default {
-			opacity: 0;
-			pointer-events: none;
-		}
+		@include hide-default-content;
 
 		.wp-block-shm-poster-content-hover {
 			transform: scaleY(1);
@@ -233,24 +244,15 @@
 		height: auto;
 	}
 
-	&:hover,
-	&.is-touched {
+	@include poster-active-state {
 
 		.shm-poster__image {
 			filter: blur(8px);
 			transform: scale(1.05);
 		}
 
-		.wp-block-shm-poster-content-default {
-			opacity: 0;
-			pointer-events: none;
-		}
-
-		.wp-block-shm-poster-content-hover {
-			opacity: 1;
-			pointer-events: auto;
-			z-index: 3;
-		}
+		@include hide-default-content;
+		@include show-hover-content;
 	}
 }
 
@@ -271,8 +273,7 @@
 		transform: translateY(-20px);
 	}
 
-	&:hover,
-	&.is-touched {
+	@include poster-active-state {
 
 		.wp-block-shm-poster-content-default {
 			opacity: 0;
@@ -289,11 +290,13 @@
 		}
 	}
 
-	&.wp-block-shm-poster--position-top:hover,
-	&.wp-block-shm-poster--position-top.is-touched {
+	&.wp-block-shm-poster--position-top {
 
-		.wp-block-shm-poster-content-default {
-			transform: translateY(20px);
+		@include poster-active-state {
+
+			.wp-block-shm-poster-content-default {
+				transform: translateY(20px);
+			}
 		}
 	}
 }
@@ -310,8 +313,7 @@
 			transform var(--poster-transition-duration) var(--poster-transition-easing);
 	}
 
-	&:hover,
-	&.is-touched {
+	@include poster-active-state {
 
 		.wp-block-shm-poster-content-hover > * {
 			opacity: 1;
@@ -330,8 +332,7 @@
 		transition: opacity var(--poster-transition-duration) var(--poster-transition-easing);
 	}
 
-	&:hover,
-	&.is-touched {
+	@include poster-active-state {
 
 		.wp-block-shm-poster-content-hover > * {
 			opacity: 1;
@@ -352,8 +353,7 @@
 			transform var(--poster-transition-duration) var(--poster-transition-easing);
 	}
 
-	&:hover,
-	&.is-touched {
+	@include poster-active-state {
 
 		.wp-block-shm-poster-content-hover > * {
 			opacity: 1;
@@ -375,8 +375,7 @@
 			transform var(--poster-transition-duration) var(--poster-transition-easing);
 	}
 
-	&:hover,
-	&.is-touched {
+	@include poster-active-state {
 
 		.wp-block-shm-poster-content-hover > * {
 			opacity: 1;

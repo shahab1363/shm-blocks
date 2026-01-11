@@ -83,7 +83,8 @@
 		},
 		"transitionEasing": {
 			"type": "string",
-			"default": "ease-in-out"
+			"default": "ease-in-out",
+			"enum": [ "ease", "ease-in", "ease-out", "ease-in-out", "linear" ]
 		},
 		"minHeight": {
 			"type": "string",
@@ -91,10 +92,6 @@
 		},
 		"aspectRatio": {
 			"type": "string"
-		},
-		"editingState": {
-			"type": "string",
-			"default": "default"
 		}
 	},
 	"supports": {

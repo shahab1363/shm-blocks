@@ -42,22 +42,36 @@ export default function save( { attributes } ) {
 		style: customStyles,
 	} );
 
-	// Determine link attributes
-	const linkProps = {
-		className: 'shm-poster__link',
-		href: linkUrl || '#',
+	// Overlay content wrapper
+	const overlayContent = (
+		<span className="shm-poster__overlays">
+			<InnerBlocks.Content />
+		</span>
+	);
+
+	// Render link or non-interactive wrapper based on linkUrl
+	const renderWrapper = () => {
+		if ( linkUrl ) {
+			const linkProps = {
+				className: 'shm-poster__link',
+				href: linkUrl,
+			};
+
+			if ( linkTarget === '_blank' ) {
+				linkProps.target = '_blank';
+				linkProps.rel = linkRel || 'noopener noreferrer';
+			}
+
+			return <a { ...linkProps }>{ overlayContent }</a>;
+		}
+
+		// No link - use non-interactive div wrapper
+		return (
+			<div className="shm-poster__link" data-no-link="true">
+				{ overlayContent }
+			</div>
+		);
 	};
-
-	if ( linkTarget === '_blank' ) {
-		linkProps.target = '_blank';
-		linkProps.rel = linkRel || 'noopener noreferrer';
-	}
-
-	// If no link URL, we still wrap in an anchor for consistent click handling
-	// but prevent navigation
-	if ( ! linkUrl ) {
-		linkProps[ 'data-no-link' ] = 'true';
-	}
 
 	return (
 		<div { ...blockProps }>
@@ -65,15 +79,11 @@ export default function save( { attributes } ) {
 				<img
 					className="shm-poster__image"
 					src={ mediaUrl }
-					alt={ imageAlt }
+					alt={ imageAlt || '' }
 					loading="lazy"
 				/>
 			) }
-			<a { ...linkProps }>
-				<span className="shm-poster__overlays">
-					<InnerBlocks.Content />
-				</span>
-			</a>
+			{ renderWrapper() }
 		</div>
 	);
 }

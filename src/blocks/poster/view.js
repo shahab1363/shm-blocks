@@ -17,6 +17,7 @@
 
 	let activePoster = null;
 	let isFirstTapComplete = false;
+	let isNavigating = false;
 
 	function isTouchDevice() {
 		return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -31,26 +32,59 @@
 	}
 
 	function navigate( link ) {
-		const href = link.getAttribute( 'href' );
-		const target = link.getAttribute( 'target' );
+		if ( isNavigating ) {
+			return;
+		}
 
-		if ( target === '_blank' ) {
-			const newWindow = window.open(
-				href,
-				'_blank',
-				'noopener,noreferrer'
-			);
-			if ( ! newWindow ) {
+		const href = link.getAttribute( 'href' );
+		if ( ! href || href === '#' ) {
+			return;
+		}
+
+		isNavigating = true;
+
+		try {
+			const target = link.getAttribute( 'target' );
+
+			if ( target === '_blank' ) {
+				const newWindow = window.open(
+					href,
+					'_blank',
+					'noopener,noreferrer'
+				);
+				if ( ! newWindow ) {
+					// Popup was blocked, fall back to same-window navigation
+					window.location.href = href;
+				}
+			} else {
 				window.location.href = href;
 			}
-		} else {
-			window.location.href = href;
+		} catch ( error ) {
+			// eslint-disable-next-line no-console
+			console.error( '[SHM Blocks] Navigation failed:', error );
+			// Reset flag on error so user can retry
+			isNavigating = false;
 		}
+	}
+
+	// Reset navigation flag when page becomes visible again (e.g., back navigation)
+	document.addEventListener( 'visibilitychange', function () {
+		if ( document.visibilityState === 'visible' ) {
+			isNavigating = false;
+		}
+	} );
+
+	function setExpandedState( poster, expanded ) {
+		if ( ! poster ) {
+			return;
+		}
+		poster.setAttribute( 'aria-expanded', expanded ? 'true' : 'false' );
 	}
 
 	function deactivatePoster() {
 		if ( activePoster ) {
 			activePoster.classList.remove( TOUCHED_CLASS );
+			setExpandedState( activePoster, false );
 			activePoster = null;
 			isFirstTapComplete = false;
 		}
@@ -62,6 +96,8 @@
 		}
 		poster.setAttribute( 'data-touch-initialized', 'true' );
 
+		setExpandedState( poster, false );
+
 		const link = poster.querySelector( LINK_SELECTOR );
 		const hasLink = hasValidLink( link );
 
@@ -72,6 +108,7 @@
 					e.preventDefault();
 					deactivatePoster();
 					poster.classList.add( TOUCHED_CLASS );
+					setExpandedState( poster, true );
 					activePoster = poster;
 					isFirstTapComplete = false;
 				}
@@ -80,7 +117,7 @@
 		);
 
 		poster.addEventListener( 'touchend', function ( e ) {
-			if ( activePoster === poster && hasLink ) {
+			if ( activePoster === poster && hasLink && ! isNavigating ) {
 				if ( isFirstTapComplete ) {
 					e.preventDefault();
 					setTimeout( function () {
@@ -95,10 +132,14 @@
 		if ( link ) {
 			link.addEventListener( 'focus', function () {
 				poster.classList.add( FOCUSED_CLASS );
+				setExpandedState( poster, true );
 			} );
 
 			link.addEventListener( 'blur', function () {
 				poster.classList.remove( FOCUSED_CLASS );
+				if ( activePoster !== poster ) {
+					setExpandedState( poster, false );
+				}
 			} );
 
 			link.addEventListener( 'keydown', function ( e ) {
