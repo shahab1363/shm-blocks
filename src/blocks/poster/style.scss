@@ -47,11 +47,48 @@
 
 	position: relative;
 	overflow: hidden;
+	width: 100%;
+	height: 100%;
 	min-height: var(--poster-min-height);
 	background-color: #1a1a1a;
 
+	// Flex container support - allow block to fill parent
+	flex: 1 1 auto;
+	min-width: 0; // Prevent flex item overflow
+
 	&[style*="--poster-aspect-ratio"] {
 		aspect-ratio: var(--poster-aspect-ratio);
+		min-height: unset;
+		height: auto; // Let aspect-ratio control height
+	}
+}
+
+// Carousel/Slider container support
+// Ensures Poster fills slide containers properly when slides use flex
+.wp-block-cb-slide-v2,
+.swiper-slide,
+.splide__slide,
+[class*="carousel"] [class*="slide"],
+[class*="slider"] [class*="slide"] {
+	// Ensure slides can contain absolutely positioned children
+	position: relative;
+
+	// Make Poster fill the slide when it's the direct child
+	> .wp-block-shm-poster {
+		flex: 1 1 100%;
+		width: 100%;
+	}
+}
+
+// When Poster is a sibling of Cover inside a slide, allow it to overlay
+.wp-block-cb-slide-v2,
+.swiper-slide,
+.splide__slide {
+
+	// When poster follows a cover block, position it absolutely to overlay
+	> .wp-block-cover + .wp-block-shm-poster {
+		position: absolute;
+		inset: 0;
 		min-height: unset;
 	}
 }

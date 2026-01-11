@@ -19,6 +19,11 @@
 	let isFirstTapComplete = false;
 	let isNavigating = false;
 
+	// Touch tracking for swipe detection
+	let touchStartX = 0;
+	let touchStartY = 0;
+	const SWIPE_THRESHOLD = 10; // pixels of movement to consider it a swipe
+
 	function isTouchDevice() {
 		return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 	}
@@ -101,33 +106,52 @@
 		const link = poster.querySelector( LINK_SELECTOR );
 		const hasLink = hasValidLink( link );
 
+		// Track touch start position for swipe detection
 		poster.addEventListener(
 			'touchstart',
 			function ( e ) {
+				const touch = e.touches[ 0 ];
+				touchStartX = touch.clientX;
+				touchStartY = touch.clientY;
+			},
+			{ passive: true }
+		);
+
+		poster.addEventListener(
+			'touchend',
+			function ( e ) {
+				const touch = e.changedTouches[ 0 ];
+				const deltaX = Math.abs( touch.clientX - touchStartX );
+				const deltaY = Math.abs( touch.clientY - touchStartY );
+
+				// If movement exceeded threshold, this was a swipe - don't handle
+				if ( deltaX > SWIPE_THRESHOLD || deltaY > SWIPE_THRESHOLD ) {
+					return;
+				}
+
+				// This was a tap, not a swipe
 				if ( activePoster !== poster ) {
+					// First tap on inactive poster - activate it
 					e.preventDefault();
 					deactivatePoster();
 					poster.classList.add( TOUCHED_CLASS );
 					setExpandedState( poster, true );
 					activePoster = poster;
 					isFirstTapComplete = false;
+				} else if ( hasLink && ! isNavigating ) {
+					// Tap on active poster - navigate on second tap
+					if ( isFirstTapComplete ) {
+						e.preventDefault();
+						setTimeout( function () {
+							navigate( link );
+						}, 100 );
+					} else {
+						isFirstTapComplete = true;
+					}
 				}
 			},
 			{ passive: false }
 		);
-
-		poster.addEventListener( 'touchend', function ( e ) {
-			if ( activePoster === poster && hasLink && ! isNavigating ) {
-				if ( isFirstTapComplete ) {
-					e.preventDefault();
-					setTimeout( function () {
-						navigate( link );
-					}, 100 );
-				} else {
-					isFirstTapComplete = true;
-				}
-			}
-		} );
 
 		if ( link ) {
 			link.addEventListener( 'focus', function () {
