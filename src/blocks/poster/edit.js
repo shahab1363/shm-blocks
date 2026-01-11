@@ -42,7 +42,7 @@ const TEMPLATE = [
 ];
 
 /**
- * Animation type options
+ * Block option configurations
  */
 const ANIMATION_TYPES = [
 	{ label: __( 'Slide', 'shm-blocks' ), value: 'slide' },
@@ -52,9 +52,6 @@ const ANIMATION_TYPES = [
 	{ label: __( 'Slide & Fade', 'shm-blocks' ), value: 'slide-fade' },
 ];
 
-/**
- * Content animation type options
- */
 const CONTENT_ANIMATION_TYPES = [
 	{ label: __( 'Fade Up', 'shm-blocks' ), value: 'fade-up' },
 	{ label: __( 'Fade', 'shm-blocks' ), value: 'fade' },
@@ -62,9 +59,6 @@ const CONTENT_ANIMATION_TYPES = [
 	{ label: __( 'Stagger', 'shm-blocks' ), value: 'stagger' },
 ];
 
-/**
- * Easing options
- */
 const EASING_OPTIONS = [
 	{ label: __( 'Ease', 'shm-blocks' ), value: 'ease' },
 	{ label: __( 'Ease In', 'shm-blocks' ), value: 'ease-in' },
@@ -73,12 +67,18 @@ const EASING_OPTIONS = [
 	{ label: __( 'Linear', 'shm-blocks' ), value: 'linear' },
 ];
 
-/**
- * Position options
- */
 const POSITION_OPTIONS = [
 	{ label: __( 'Bottom', 'shm-blocks' ), value: 'bottom' },
 	{ label: __( 'Top', 'shm-blocks' ), value: 'top' },
+];
+
+const ASPECT_RATIO_OPTIONS = [
+	{ label: __( 'None', 'shm-blocks' ), value: '' },
+	{ label: '16:9', value: '16/9' },
+	{ label: '4:3', value: '4/3' },
+	{ label: '1:1', value: '1/1' },
+	{ label: '3:4', value: '3/4' },
+	{ label: '9:16', value: '9/16' },
 ];
 
 /**
@@ -106,17 +106,15 @@ export default function Edit( { attributes, setAttributes } ) {
 	const [ isLinkPopoverOpen, setIsLinkPopoverOpen ] = useState( false );
 	const [ isPreviewingHover, setIsPreviewingHover ] = useState( false );
 
-	// Build CSS custom properties using shared utility
 	const customStyles = buildCustomStyles( attributes );
 
-	// Build class names
 	const classNames = [
 		'wp-block-shm-poster',
 		`wp-block-shm-poster--animation-${ animationType }`,
 		`wp-block-shm-poster--content-${ contentAnimationType }`,
 		`wp-block-shm-poster--position-${ overlayPosition }`,
 		editingState === 'hover' ? 'is-editing-hover' : 'is-editing-default',
-		isPreviewingHover ? 'is-previewing-hover' : '',
+		isPreviewingHover && 'is-previewing-hover',
 	]
 		.filter( Boolean )
 		.join( ' ' );
@@ -126,9 +124,8 @@ export default function Edit( { attributes, setAttributes } ) {
 		style: customStyles,
 	} );
 
-	// Handler for media selection
-	const onSelectMedia = ( media ) => {
-		if ( ! media || ! media.url ) {
+	function onSelectMedia( media ) {
+		if ( ! media?.url ) {
 			setAttributes( { mediaId: undefined, mediaUrl: undefined } );
 			return;
 		}
@@ -137,16 +134,37 @@ export default function Edit( { attributes, setAttributes } ) {
 			mediaUrl: media.url,
 			imageAlt: media.alt || '',
 		} );
-	};
+	}
 
-	// Handler for link change
-	const onLinkChange = ( newLink ) => {
+	function onLinkChange( newLink ) {
+		const opensInNewTab = newLink?.opensInNewTab;
 		setAttributes( {
 			linkUrl: newLink?.url || '',
-			linkTarget: newLink?.opensInNewTab ? '_blank' : '_self',
-			linkRel: newLink?.opensInNewTab ? 'noopener noreferrer' : '',
+			linkTarget: opensInNewTab ? '_blank' : '_self',
+			linkRel: opensInNewTab ? 'noopener noreferrer' : '',
 		} );
-	};
+	}
+
+	function toggleEditingState() {
+		setAttributes( {
+			editingState: editingState === 'default' ? 'hover' : 'default',
+		} );
+	}
+
+	function clearLink() {
+		setAttributes( {
+			linkUrl: '',
+			linkTarget: '_self',
+			linkRel: '',
+		} );
+	}
+
+	function clearMedia() {
+		setAttributes( {
+			mediaId: undefined,
+			mediaUrl: undefined,
+		} );
+	}
 
 	return (
 		<>
@@ -161,14 +179,7 @@ export default function Edit( { attributes, setAttributes } ) {
 								? __( 'Editing Default State', 'shm-blocks' )
 								: __( 'Editing Hover State', 'shm-blocks' )
 						}
-						onClick={ () =>
-							setAttributes( {
-								editingState:
-									editingState === 'default'
-										? 'hover'
-										: 'default',
-							} )
-						}
+						onClick={ toggleEditingState }
 						isPressed={ editingState === 'hover' }
 					>
 						{ editingState === 'default'
@@ -223,13 +234,7 @@ export default function Edit( { attributes, setAttributes } ) {
 										opensInNewTab: linkTarget === '_blank',
 									} }
 									onChange={ onLinkChange }
-									onRemove={ () =>
-										setAttributes( {
-											linkUrl: '',
-											linkTarget: '_self',
-											linkRel: '',
-										} )
-									}
+									onRemove={ clearLink }
 								/>
 							</div>
 						</Popover>
@@ -272,12 +277,7 @@ export default function Edit( { attributes, setAttributes } ) {
 											<Button
 												variant="tertiary"
 												isDestructive
-												onClick={ () =>
-													setAttributes( {
-														mediaId: undefined,
-														mediaUrl: undefined,
-													} )
-												}
+												onClick={ clearMedia }
 											>
 												{ __( 'Remove', 'shm-blocks' ) }
 											</Button>
@@ -478,14 +478,7 @@ export default function Edit( { attributes, setAttributes } ) {
 					<SelectControl
 						label={ __( 'Aspect Ratio', 'shm-blocks' ) }
 						value={ attributes.aspectRatio || '' }
-						options={ [
-							{ label: __( 'None', 'shm-blocks' ), value: '' },
-							{ label: '16:9', value: '16/9' },
-							{ label: '4:3', value: '4/3' },
-							{ label: '1:1', value: '1/1' },
-							{ label: '3:4', value: '3/4' },
-							{ label: '9:16', value: '9/16' },
-						] }
+						options={ ASPECT_RATIO_OPTIONS }
 						onChange={ ( value ) =>
 							setAttributes( { aspectRatio: value || undefined } )
 						}

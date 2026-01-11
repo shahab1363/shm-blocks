@@ -2,29 +2,14 @@
  * WordPress dependencies
  */
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
-import { __ } from '@wordpress/i18n';
 
 /**
- * Allowed blocks for content areas
+ * Internal dependencies
  */
-const ALLOWED_BLOCKS = [
-	'core/heading',
-	'core/paragraph',
-	'core/image',
-	'core/buttons',
-	'core/button',
-	'core/list',
-	'core/separator',
-	'core/spacer',
-	'core/group',
-];
-
-/**
- * Default template for initial content
- */
-const TEMPLATE = [
-	[ 'core/heading', { level: 3, placeholder: __( 'Title…', 'shm-blocks' ) } ],
-];
+import {
+	ALLOWED_CONTENT_BLOCKS,
+	DEFAULT_CONTENT_TEMPLATE,
+} from '../poster/constants';
 
 /**
  * Edit component for Poster Default Content block
@@ -39,8 +24,8 @@ export default function Edit() {
 	return (
 		<div { ...blockProps }>
 			<InnerBlocks
-				allowedBlocks={ ALLOWED_BLOCKS }
-				template={ TEMPLATE }
+				allowedBlocks={ ALLOWED_CONTENT_BLOCKS }
+				template={ DEFAULT_CONTENT_TEMPLATE }
 				templateLock={ false }
 			/>
 		</div>
