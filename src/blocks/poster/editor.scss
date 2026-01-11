@@ -89,8 +89,13 @@
 			opacity: 1;
 			z-index: 10;
 			height: var(--poster-overlay-height-hover);
+			justify-content: center; // Center content when expanded
 			outline: 2px dashed rgba(255, 255, 255, 0.5);
 			outline-offset: -2px;
+		}
+
+		.block-editor-block-list__layout {
+			justify-content: center; // Center inner blocks layout too
 		}
 	}
 
@@ -106,6 +111,11 @@
 			opacity: 1;
 			z-index: 10;
 			height: var(--poster-overlay-height-hover);
+			justify-content: center; // Center content when expanded
+		}
+
+		.block-editor-block-list__layout {
+			justify-content: center; // Center inner blocks layout too
 		}
 
 		.wp-block-shm-poster-content-default::before,
