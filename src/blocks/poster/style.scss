@@ -64,7 +64,7 @@
 }
 
 // Carousel/Slider container support
-// Ensures Poster fills slide containers properly when slides use flex
+// Ensures Poster fills slide containers properly (works for both flex and block layouts)
 .wp-block-cb-slide-v2,
 .swiper-slide,
 .splide__slide,
@@ -75,8 +75,10 @@
 
 	// Make Poster fill the slide when it's the direct child
 	> .wp-block-shm-poster {
-		flex: 1 1 100%;
+		flex: 1 1 100%; // For flex containers
 		width: 100%;
+		height: 100%; // For block containers
+		min-height: unset; // Override default min-height when in slides
 	}
 }
 
