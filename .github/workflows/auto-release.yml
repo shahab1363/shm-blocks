@@ -1,0 +1,140 @@
+name: Auto Release
+
+on:
+    push:
+        branches:
+            - main
+        paths-ignore:
+            - '.github/workflows/**'
+            - '*.md'
+
+permissions:
+    contents: write
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Check if should skip
+              id: check_skip
+              env:
+                  COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+              run: |
+                  if echo "$COMMIT_MESSAGE" | grep -q '\[skip release\]'; then
+                    echo "skip=true" >> $GITHUB_OUTPUT
+                    echo "Skipping release: commit message contains [skip release]"
+                  elif echo "$COMMIT_MESSAGE" | grep -q '^chore: bump version'; then
+                    echo "skip=true" >> $GITHUB_OUTPUT
+                    echo "Skipping release: version bump commit"
+                  else
+                    echo "skip=false" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Checkout code
+              if: steps.check_skip.outputs.skip != 'true'
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Setup Node.js
+              if: steps.check_skip.outputs.skip != 'true'
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '20'
+                  cache: 'npm'
+
+            - name: Get current version
+              if: steps.check_skip.outputs.skip != 'true'
+              id: get_version
+              run: |
+                  CURRENT_VERSION=$(node -p "require('./package.json').version")
+                  echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+
+            - name: Bump patch version
+              if: steps.check_skip.outputs.skip != 'true'
+              id: bump_version
+              env:
+                  CURRENT_VERSION: ${{ steps.get_version.outputs.current_version }}
+              run: |
+                  # Split version into parts
+                  IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+                  # Increment patch
+                  NEW_PATCH=$((PATCH + 1))
+                  NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
+                  echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+                  echo "Bumping version from $CURRENT_VERSION to $NEW_VERSION"
+
+            - name: Update package.json version
+              if: steps.check_skip.outputs.skip != 'true'
+              env:
+                  NEW_VERSION: ${{ steps.bump_version.outputs.new_version }}
+              run: |
+                  npm version "$NEW_VERSION" --no-git-tag-version
+
+            - name: Update PHP plugin version
+              if: steps.check_skip.outputs.skip != 'true'
+              env:
+                  NEW_VERSION: ${{ steps.bump_version.outputs.new_version }}
+              run: |
+                  sed -i "s/Version:           .*/Version:           $NEW_VERSION/" shm-blocks.php
+
+            - name: Configure git
+              if: steps.check_skip.outputs.skip != 'true'
+              run: |
+                  git config user.name "github-actions[bot]"
+                  git config user.email "github-actions[bot]@users.noreply.github.com"
+
+            - name: Commit version bump
+              if: steps.check_skip.outputs.skip != 'true'
+              env:
+                  NEW_VERSION: ${{ steps.bump_version.outputs.new_version }}
+              run: |
+                  git add package.json shm-blocks.php
+                  git commit -m "chore: bump version to $NEW_VERSION [skip release]"
+                  git push
+
+            - name: Create and push tag
+              if: steps.check_skip.outputs.skip != 'true'
+              env:
+                  NEW_VERSION: ${{ steps.bump_version.outputs.new_version }}
+              run: |
+                  git tag "v$NEW_VERSION"
+                  git push origin "v$NEW_VERSION"
+
+            - name: Generate release notes
+              if: steps.check_skip.outputs.skip != 'true'
+              id: release_notes
+              env:
+                  COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+                  REPO: ${{ github.repository }}
+                  CURRENT_VERSION: ${{ steps.get_version.outputs.current_version }}
+                  NEW_VERSION: ${{ steps.bump_version.outputs.new_version }}
+              run: |
+                  # Get the first line of commit message (usually PR title)
+                  PR_TITLE=$(echo "$COMMIT_MESSAGE" | head -n 1)
+
+                  # Create release notes
+                  cat << EOF > release_notes.md
+                  ## What's Changed
+
+                  $PR_TITLE
+
+                  **Full Changelog**: https://github.com/$REPO/compare/v$CURRENT_VERSION...v$NEW_VERSION
+                  EOF
+
+                  echo "Generated release notes:"
+                  cat release_notes.md
+
+            - name: Create GitHub Release
+              if: steps.check_skip.outputs.skip != 'true'
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: v${{ steps.bump_version.outputs.new_version }}
+                  name: v${{ steps.bump_version.outputs.new_version }}
+                  body_path: release_notes.md
+                  draft: false
+                  prerelease: false
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
