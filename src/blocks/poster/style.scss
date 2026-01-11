@@ -67,37 +67,6 @@
 	}
 }
 
-// Carousel/Slider container support
-// Poster stays in normal document flow (like Cover block) and uses min-height
-// The carousel plugin will handle equalizing slide heights
-.wp-block-cb-slide-v2,
-.swiper-slide,
-.splide__slide,
-[class*="carousel"] [class*="slide"],
-[class*="slider"] [class*="slide"] {
-	// Ensure slides can contain absolutely positioned children (for image/overlay)
-	position: relative;
-
-	// Poster fills available space via flex
-	> .wp-block-shm-poster {
-		flex: 1 1 100%;
-		width: 100%;
-	}
-}
-
-// When Poster is a sibling of Cover inside a slide, allow it to overlay
-.wp-block-cb-slide-v2,
-.swiper-slide,
-.splide__slide {
-
-	// When poster follows a cover block, position it absolutely to overlay
-	> .wp-block-cover + .wp-block-shm-poster {
-		position: absolute;
-		inset: 0;
-		min-height: unset;
-	}
-}
-
 .shm-poster__image {
 	position: absolute;
 	inset: 0;
