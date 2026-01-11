@@ -459,6 +459,14 @@ export default function Edit( { attributes, setAttributes } ) {
 						className="shm-poster__image"
 						src={ mediaUrl }
 						alt={ imageAlt || '' }
+						style={ {
+							position: 'absolute',
+							inset: 0,
+							width: '100%',
+							height: '100%',
+							objectFit: 'cover',
+							objectPosition: `${ ( focalPoint?.x ?? 0.5 ) * 100 }% ${ ( focalPoint?.y ?? 0.5 ) * 100 }%`,
+						} }
 					/>
 				) : (
 					<div className="shm-poster__placeholder">
