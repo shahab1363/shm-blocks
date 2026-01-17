@@ -8,7 +8,7 @@
 import { __ } from '@wordpress/i18n';
 
 /**
- * Allowed blocks for content child blocks
+ * Allowed blocks for poster content area
  */
 export const ALLOWED_CONTENT_BLOCKS = [
 	'core/heading',
@@ -20,30 +20,7 @@ export const ALLOWED_CONTENT_BLOCKS = [
 	'core/separator',
 	'core/spacer',
 	'core/group',
-];
-
-/**
- * Default template for default state content
- */
-export const DEFAULT_CONTENT_TEMPLATE = [
-	[
-		'core/heading',
-		{ level: 3, placeholder: __( 'Title\u2026', 'shm-blocks' ) },
-	],
-];
-
-/**
- * Default template for hover state content
- */
-export const HOVER_CONTENT_TEMPLATE = [
-	[
-		'core/heading',
-		{ level: 3, placeholder: __( 'Title\u2026', 'shm-blocks' ) },
-	],
-	[
-		'core/paragraph',
-		{ placeholder: __( 'Summary text\u2026', 'shm-blocks' ) },
-	],
+	'shm/poster-hover-content',
 ];
 
 /**
@@ -55,17 +32,6 @@ export const ANIMATION_TYPES = [
 	{ label: __( 'Scale', 'shm-blocks' ), value: 'scale' },
 	{ label: __( 'Blur', 'shm-blocks' ), value: 'blur' },
 	{ label: __( 'Slide & Fade', 'shm-blocks' ), value: 'slide-fade' },
-];
-
-/**
- * Animation type options for content elements
- */
-export const CONTENT_ANIMATION_TYPES = [
-	{ label: __( 'None (slide with overlay)', 'shm-blocks' ), value: 'none' },
-	{ label: __( 'Fade Up', 'shm-blocks' ), value: 'fade-up' },
-	{ label: __( 'Fade', 'shm-blocks' ), value: 'fade' },
-	{ label: __( 'Scale', 'shm-blocks' ), value: 'scale' },
-	{ label: __( 'Stagger', 'shm-blocks' ), value: 'stagger' },
 ];
 
 /**

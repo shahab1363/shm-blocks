@@ -1,5 +1,6 @@
 /**
  * Poster Block Styles - Frontend and editor shared
+ * New architecture: Single overlay with reveal-based animation
  */
 
 // Mixin for hover/touch active states
@@ -11,56 +12,7 @@
 	}
 }
 
-// Common styles for hiding default content in active state
-@mixin hide-default-content {
-
-	.wp-block-shm-poster-content-default {
-		opacity: 0;
-		pointer-events: none;
-	}
-}
-
-// Common styles for showing hover content in active state
-@mixin show-hover-content {
-
-	.wp-block-shm-poster-content-hover {
-		opacity: 1;
-		pointer-events: auto;
-		z-index: 3;
-	}
-}
-
-// Mixin for content animation base styles
-@mixin content-animation-base($transform: null) {
-
-	.wp-block-shm-poster-content-hover > * {
-		opacity: 0;
-
-		@if $transform {
-			transform: $transform;
-			transition:
-				opacity var(--poster-transition-duration) var(--poster-transition-easing),
-				transform var(--poster-transition-duration) var(--poster-transition-easing);
-		} @else {
-			transition: opacity var(--poster-transition-duration) var(--poster-transition-easing);
-		}
-	}
-
-	@include poster-active-state {
-
-		.wp-block-shm-poster-content-hover > * {
-			opacity: 1;
-
-			@if $transform {
-				transform: none;
-			}
-
-			transition-delay: var(--poster-content-delay);
-		}
-	}
-}
-
-// Base styles - modeled after Cover block for consistent carousel behavior
+// Base styles
 .wp-block-shm-poster {
 	--poster-overlay-color: #000;
 	--poster-overlay-color-rgb: 0, 0, 0;
@@ -70,12 +22,10 @@
 	--poster-overlay-height-hover: 100%;
 	--poster-transition-duration: 400ms;
 	--poster-transition-easing: ease-in-out;
-	--poster-content-delay: 100ms;
-	--poster-min-height: 430px; // Match Cover block default
+	--poster-min-height: 400px;
 	--poster-focal-x: 50%;
 	--poster-focal-y: 50%;
 
-	// Cover-like base properties
 	position: relative;
 	display: flex;
 	flex-direction: column;
@@ -84,23 +34,29 @@
 	box-sizing: border-box;
 	overflow: hidden;
 	width: 100%;
-	height: 100%; // Fill parent container (like Cover block)
+	height: 100%;
 	min-height: var(--poster-min-height);
 	background-color: #1a1a1a;
-
-	// Flex item support - allow block to fill parent
 	flex: 1 1 auto;
-	min-width: 0; // Prevent flex item overflow
+	min-width: 0;
 
 	&[style*="--poster-aspect-ratio"] {
 		aspect-ratio: var(--poster-aspect-ratio);
 		min-height: unset;
 	}
+
+	// Active states (hover and touch)
+	@include poster-active-state {
+
+		.shm-poster__overlay {
+			height: var(--poster-overlay-height-hover);
+			// stylelint-disable-next-line function-parentheses-space-inside
+			background: rgba(var(--poster-overlay-color-rgb), var(--poster-overlay-opacity-hover));
+		}
+	}
 }
 
 // Make parent flex items stretch when containing a Poster block
-// This ensures Poster matches sibling heights in carousels/sliders
-// stylelint-disable-next-line no-descending-specificity
 *:has(> .wp-block-shm-poster),
 .swiper-slide:has(.wp-block-shm-poster),
 .splide__slide:has(.wp-block-shm-poster),
@@ -110,6 +66,7 @@
 	align-self: stretch;
 }
 
+// Background image
 .shm-poster__image {
 	position: absolute;
 	inset: 0;
@@ -122,6 +79,7 @@
 		transform var(--poster-transition-duration) var(--poster-transition-easing);
 }
 
+// Link wrapper
 .shm-poster__link {
 	display: block;
 	position: absolute;
@@ -147,27 +105,28 @@
 	}
 }
 
-.shm-poster__overlays {
-	display: contents;
-}
-
-// Content child blocks - base styles
-.wp-block-shm-poster-content-default,
-.wp-block-shm-poster-content-hover {
+// Overlay container - single container with reveal animation
+.shm-poster__overlay {
 	position: absolute;
 	left: 0;
 	right: 0;
+	bottom: 0;
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-end;
 	padding: 1.5rem;
 	box-sizing: border-box;
 	color: #fff;
+	overflow: hidden;
+	height: var(--poster-overlay-height);
+	// stylelint-disable-next-line function-parentheses-space-inside
+	background: rgba(var(--poster-overlay-color-rgb), var(--poster-overlay-opacity));
 	transition:
 		height var(--poster-transition-duration) var(--poster-transition-easing),
-		opacity var(--poster-transition-duration) var(--poster-transition-easing),
-		transform var(--poster-transition-duration) var(--poster-transition-easing);
+		background var(--poster-transition-duration) var(--poster-transition-easing);
+	z-index: 2;
 
+	// Typography defaults
 	a {
 		color: inherit;
 	}
@@ -193,125 +152,104 @@
 	}
 }
 
-.wp-block-shm-poster-content-default {
-	bottom: 0;
-	height: var(--poster-overlay-height);
-	background: rgba(var(--poster-overlay-color-rgb), var(--poster-overlay-opacity));
-	z-index: 2;
-}
-
-.wp-block-shm-poster-content-hover {
-	bottom: 0;
-	height: var(--poster-overlay-height);
-	background: rgba(var(--poster-overlay-color-rgb), var(--poster-overlay-opacity-hover));
-	opacity: 0;
-	pointer-events: none;
-	z-index: 1;
-
-	// Center content vertically when expanded to full height
-	&.is-centered,
-	.wp-block-shm-poster:hover &,
-	.wp-block-shm-poster.is-touched & {
-		justify-content: center;
-	}
+// Hover content wrapper - hidden initially, revealed on hover
+.wp-block-shm-poster-hover-content {
+	margin-top: 0.5em;
 }
 
 // Position: Top
 .wp-block-shm-poster--position-top {
 
-	// stylelint-disable-next-line no-descending-specificity
-	.wp-block-shm-poster-content-default,
-	.wp-block-shm-poster-content-hover {
+	.shm-poster__overlay {
 		top: 0;
 		bottom: auto;
 		justify-content: flex-start;
 	}
-
-	// Override: center hover content when active
-	@include poster-active-state {
-
-		.wp-block-shm-poster-content-hover {
-			justify-content: center;
-		}
-	}
 }
 
-// Animation: Slide (default)
+// Animation: Slide (default) - height transition reveals content
 .wp-block-shm-poster--animation-slide {
-
-	@include poster-active-state {
-
-		@include hide-default-content;
-
-		.wp-block-shm-poster-content-hover {
-			height: var(--poster-overlay-height-hover);
-			opacity: 1;
-			pointer-events: auto;
-			z-index: 3;
-		}
-	}
+	// Default behavior - overlay height animates
 }
 
-// Animation: Fade
+// Animation: Fade - full overlay fades in/out
 .wp-block-shm-poster--animation-fade {
 
 	// stylelint-disable-next-line no-descending-specificity
-	.wp-block-shm-poster-content-default,
-	.wp-block-shm-poster-content-hover {
-		inset: 0;
-		height: auto;
+	.shm-poster__overlay {
+		height: 100%;
+		opacity: var(--poster-overlay-opacity);
+		// stylelint-disable-next-line function-parentheses-space-inside
+		background: rgba(var(--poster-overlay-color-rgb), 1);
+		transition: opacity var(--poster-transition-duration) var(--poster-transition-easing);
+	}
+
+	.wp-block-shm-poster-hover-content {
+		opacity: 0;
+		transition: opacity var(--poster-transition-duration) var(--poster-transition-easing);
 	}
 
 	@include poster-active-state {
 
-		@include hide-default-content;
-		@include show-hover-content;
+		// stylelint-disable-next-line no-descending-specificity
+		.shm-poster__overlay {
+			opacity: var(--poster-overlay-opacity-hover);
+		}
+
+		.wp-block-shm-poster-hover-content {
+			opacity: 1;
+		}
 	}
 }
 
-// Animation: Scale
+// Animation: Scale - overlay scales up
 .wp-block-shm-poster--animation-scale {
 
 	// stylelint-disable-next-line no-descending-specificity
-	.wp-block-shm-poster-content-default {
-		transform-origin: bottom center;
-	}
-
-	// stylelint-disable-next-line no-descending-specificity
-	.wp-block-shm-poster-content-hover {
+	.shm-poster__overlay {
 		height: 100%;
-		transform: scaleY(0);
+		transform: scaleY(0.3);
 		transform-origin: bottom center;
+		transition:
+			transform var(--poster-transition-duration) var(--poster-transition-easing),
+			background var(--poster-transition-duration) var(--poster-transition-easing);
 	}
 
-	&.wp-block-shm-poster--position-top {
+	.wp-block-shm-poster-hover-content {
+		opacity: 0;
+		transition: opacity var(--poster-transition-duration) var(--poster-transition-easing);
+	}
 
-		.wp-block-shm-poster-content-default,
-		.wp-block-shm-poster-content-hover {
-			transform-origin: top center;
-		}
+	&.wp-block-shm-poster--position-top .shm-poster__overlay {
+		transform-origin: top center;
 	}
 
 	@include poster-active-state {
 
-		@include hide-default-content;
-
-		.wp-block-shm-poster-content-hover {
+		// stylelint-disable-next-line no-descending-specificity
+		.shm-poster__overlay {
 			transform: scaleY(1);
+			// stylelint-disable-next-line function-parentheses-space-inside
+			background: rgba(var(--poster-overlay-color-rgb), var(--poster-overlay-opacity-hover));
+		}
+
+		.wp-block-shm-poster-hover-content {
 			opacity: 1;
-			pointer-events: auto;
-			z-index: 3;
 		}
 	}
 }
 
-// Animation: Blur
+// Animation: Blur - background blurs on hover
 .wp-block-shm-poster--animation-blur {
 
 	// stylelint-disable-next-line no-descending-specificity
-	.wp-block-shm-poster-content-hover {
-		inset: 0;
-		height: auto;
+	.shm-poster__overlay {
+		height: 100%;
+	}
+
+	.wp-block-shm-poster-hover-content {
+		opacity: 0;
+		transition: opacity var(--poster-transition-duration) var(--poster-transition-easing);
 	}
 
 	@include poster-active-state {
@@ -321,81 +259,24 @@
 			transform: scale(1.05);
 		}
 
-		@include hide-default-content;
-		@include show-hover-content;
+		// stylelint-disable-next-line no-descending-specificity
+		.shm-poster__overlay {
+			// stylelint-disable-next-line function-parentheses-space-inside
+			background: rgba(var(--poster-overlay-color-rgb), var(--poster-overlay-opacity-hover));
+		}
+
+		.wp-block-shm-poster-hover-content {
+			opacity: 1;
+		}
 	}
 }
 
-// Animation: Slide-Fade
+// Animation: Slide & Fade - combines slide with fade
 .wp-block-shm-poster--animation-slide-fade {
 
-	// stylelint-disable-next-line no-descending-specificity
-	.wp-block-shm-poster-content-default {
-		transform: translateY(0);
-	}
-
-	// stylelint-disable-next-line no-descending-specificity
-	.wp-block-shm-poster-content-hover {
-		transform: translateY(20px);
-	}
-
-	&.wp-block-shm-poster--position-top .wp-block-shm-poster-content-hover {
-		transform: translateY(-20px);
-	}
-
-	@include poster-active-state {
-
-		.wp-block-shm-poster-content-default {
-			opacity: 0;
-			transform: translateY(-20px);
-			pointer-events: none;
-		}
-
-		.wp-block-shm-poster-content-hover {
-			height: var(--poster-overlay-height-hover);
-			opacity: 1;
-			transform: translateY(0);
-			pointer-events: auto;
-			z-index: 3;
-		}
-	}
-
-	&.wp-block-shm-poster--position-top {
-
-		@include poster-active-state {
-
-			.wp-block-shm-poster-content-default {
-				transform: translateY(20px);
-			}
-		}
-	}
-}
-
-// Content Animation: Fade-Up
-.wp-block-shm-poster--content-fade-up {
-
-	@include content-animation-base(translateY(20px));
-}
-
-// Content Animation: Fade
-.wp-block-shm-poster--content-fade {
-
-	@include content-animation-base;
-}
-
-// Content Animation: Scale
-.wp-block-shm-poster--content-scale {
-
-	@include content-animation-base(scale(0.9));
-}
-
-// Content Animation: Stagger
-.wp-block-shm-poster--content-stagger {
-
-	// stylelint-disable-next-line no-descending-specificity
-	.wp-block-shm-poster-content-hover > * {
+	.wp-block-shm-poster-hover-content {
 		opacity: 0;
-		transform: translateY(15px);
+		transform: translateY(10px);
 		transition:
 			opacity var(--poster-transition-duration) var(--poster-transition-easing),
 			transform var(--poster-transition-duration) var(--poster-transition-easing);
@@ -403,70 +284,17 @@
 
 	@include poster-active-state {
 
-		.wp-block-shm-poster-content-hover > * {
+		// stylelint-disable-next-line no-descending-specificity
+		.shm-poster__overlay {
+			height: var(--poster-overlay-height-hover);
+			// stylelint-disable-next-line function-parentheses-space-inside
+			background: rgba(var(--poster-overlay-color-rgb), var(--poster-overlay-opacity-hover));
+		}
+
+		.wp-block-shm-poster-hover-content {
 			opacity: 1;
 			transform: translateY(0);
-
-			@for $i from 1 through 10 {
-				&:nth-child(#{$i}) {
-					transition-delay: calc(var(--poster-content-delay) + #{($i - 1) * 50}ms);
-				}
-			}
 		}
-	}
-}
-
-// Content Animation: None (slide with overlay)
-// Content moves together with the overlay - no separate fade animation
-.wp-block-shm-poster--content-none {
-
-	// Hover content visible from start, no opacity transition
-	// stylelint-disable-next-line no-descending-specificity
-	.wp-block-shm-poster-content-hover {
-		opacity: 1;
-		justify-content: center;
-		transition:
-			height var(--poster-transition-duration) var(--poster-transition-easing),
-			transform var(--poster-transition-duration) var(--poster-transition-easing);
-	}
-
-	// No opacity/transform transitions on children - they're visible immediately
-	// stylelint-disable-next-line no-descending-specificity
-	.wp-block-shm-poster-content-hover > * {
-		opacity: 1;
-		transform: none;
-		transition: none;
-	}
-
-	// Default content fades out instantly on hover
-	@include poster-active-state {
-
-		// stylelint-disable-next-line no-descending-specificity
-		.wp-block-shm-poster-content-default {
-			opacity: 0;
-			transition: opacity 0.1s ease-out;
-		}
-
-		// stylelint-disable-next-line no-descending-specificity
-		.wp-block-shm-poster-content-hover {
-			justify-content: center;
-		}
-	}
-}
-
-// No content fade modifier - hover content visible from start
-.wp-block-shm-poster--no-content-fade {
-
-	// stylelint-disable-next-line no-descending-specificity
-	.wp-block-shm-poster-content-hover {
-		opacity: 1;
-	}
-
-	// Children visible immediately, no opacity animation
-	// stylelint-disable-next-line no-descending-specificity
-	.wp-block-shm-poster-content-hover > * {
-		opacity: 1 !important;
-		transition: transform var(--poster-transition-duration) var(--poster-transition-easing) !important;
 	}
 }
 
@@ -474,17 +302,15 @@
 .wp-block-shm-poster:has(.shm-poster__link:focus-visible) {
 
 	// stylelint-disable-next-line no-descending-specificity
-	.wp-block-shm-poster-content-default {
-		opacity: 0;
-		pointer-events: none;
+	.shm-poster__overlay {
+		height: var(--poster-overlay-height-hover);
+		// stylelint-disable-next-line function-parentheses-space-inside
+		background: rgba(var(--poster-overlay-color-rgb), var(--poster-overlay-opacity-hover));
 	}
 
-	// stylelint-disable-next-line no-descending-specificity
-	.wp-block-shm-poster-content-hover {
-		height: var(--poster-overlay-height-hover);
+	.wp-block-shm-poster-hover-content {
 		opacity: 1;
-		pointer-events: auto;
-		z-index: 3;
+		transform: none;
 	}
 }
 

@@ -32,7 +32,7 @@ function shm_blocks_init() {
 	global $shm_blocks_registration_errors;
 
 	$blocks_dir = __DIR__ . '/build/blocks';
-	$blocks     = array( 'poster', 'poster-content-default', 'poster-content-hover' );
+	$blocks     = array( 'poster', 'poster-hover-content' );
 
 	foreach ( $blocks as $block ) {
 		$block_path = $blocks_dir . '/' . $block;

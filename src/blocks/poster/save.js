@@ -24,8 +24,6 @@ export default function save( { attributes } ) {
 		linkRel,
 		overlayPosition,
 		animationType,
-		contentAnimationType,
-		contentFadeEnabled,
 		focalPoint,
 	} = attributes;
 
@@ -35,9 +33,7 @@ export default function save( { attributes } ) {
 	// Build class names
 	const classNames = [
 		`wp-block-shm-poster--animation-${ animationType }`,
-		`wp-block-shm-poster--content-${ contentAnimationType }`,
 		`wp-block-shm-poster--position-${ overlayPosition }`,
-		! contentFadeEnabled && 'wp-block-shm-poster--no-content-fade',
 	]
 		.filter( Boolean )
 		.join( ' ' );
@@ -49,7 +45,7 @@ export default function save( { attributes } ) {
 
 	// Overlay content wrapper
 	const overlayContent = (
-		<span className="shm-poster__overlays">
+		<span className="shm-poster__overlay">
 			<InnerBlocks.Content />
 		</span>
 	);
