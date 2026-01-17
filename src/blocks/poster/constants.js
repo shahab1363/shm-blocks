@@ -61,6 +61,7 @@ export const ANIMATION_TYPES = [
  * Animation type options for content elements
  */
 export const CONTENT_ANIMATION_TYPES = [
+	{ label: __( 'None (slide with overlay)', 'shm-blocks' ), value: 'none' },
 	{ label: __( 'Fade Up', 'shm-blocks' ), value: 'fade-up' },
 	{ label: __( 'Fade', 'shm-blocks' ), value: 'fade' },
 	{ label: __( 'Scale', 'shm-blocks' ), value: 'scale' },
