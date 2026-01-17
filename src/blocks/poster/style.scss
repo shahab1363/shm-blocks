@@ -171,14 +171,22 @@
 .wp-block-shm-poster--animation-slide {
 
 	.wp-block-shm-poster-hover-content {
+		max-height: 0;
+		overflow: hidden;
 		opacity: 0;
-		transition: opacity var(--poster-transition-duration) var(--poster-transition-easing);
+		margin-top: 0;
+		transition:
+			max-height var(--poster-transition-duration) var(--poster-transition-easing),
+			opacity var(--poster-transition-duration) var(--poster-transition-easing),
+			margin-top var(--poster-transition-duration) var(--poster-transition-easing);
 	}
 
 	@include poster-active-state {
 
 		.wp-block-shm-poster-hover-content {
+			max-height: 500px;
 			opacity: 1;
+			margin-top: 0.5em;
 		}
 	}
 }
