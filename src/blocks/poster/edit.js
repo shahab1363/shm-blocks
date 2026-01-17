@@ -33,27 +33,12 @@ import { link, image } from '@wordpress/icons';
  */
 import { buildCustomStyles } from './utils';
 import {
+	ALLOWED_CONTENT_BLOCKS,
 	ANIMATION_TYPES,
 	EASING_OPTIONS,
 	POSITION_OPTIONS,
 	ASPECT_RATIO_OPTIONS,
 } from './constants';
-
-/**
- * Allowed blocks inside poster content area
- */
-const ALLOWED_BLOCKS = [
-	'core/heading',
-	'core/paragraph',
-	'core/image',
-	'core/buttons',
-	'core/button',
-	'core/list',
-	'core/separator',
-	'core/spacer',
-	'core/group',
-	'shm/poster-hover-content',
-];
 
 /**
  * Template for inner blocks - default content + hover content wrapper
@@ -484,7 +469,7 @@ export default function Edit( { attributes, setAttributes } ) {
 
 				<div className="shm-poster__overlay">
 					<InnerBlocks
-						allowedBlocks={ ALLOWED_BLOCKS }
+						allowedBlocks={ ALLOWED_CONTENT_BLOCKS }
 						template={ TEMPLATE }
 						templateLock={ false }
 					/>

@@ -8,9 +8,9 @@
 import { __ } from '@wordpress/i18n';
 
 /**
- * Allowed blocks for poster content area
+ * Allowed blocks inside inner content areas
  */
-export const ALLOWED_CONTENT_BLOCKS = [
+export const ALLOWED_INNER_BLOCKS = [
 	'core/heading',
 	'core/paragraph',
 	'core/image',
@@ -20,6 +20,13 @@ export const ALLOWED_CONTENT_BLOCKS = [
 	'core/separator',
 	'core/spacer',
 	'core/group',
+];
+
+/**
+ * Allowed blocks for poster content area (includes hover content wrapper)
+ */
+export const ALLOWED_CONTENT_BLOCKS = [
+	...ALLOWED_INNER_BLOCKS,
 	'shm/poster-hover-content',
 ];
 

@@ -5,19 +5,9 @@ import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 
 /**
- * Allowed blocks inside hover content
+ * Internal dependencies
  */
-const ALLOWED_BLOCKS = [
-	'core/heading',
-	'core/paragraph',
-	'core/image',
-	'core/buttons',
-	'core/button',
-	'core/list',
-	'core/separator',
-	'core/spacer',
-	'core/group',
-];
+import { ALLOWED_INNER_BLOCKS } from '../poster/constants';
 
 /**
  * Default template
@@ -41,11 +31,8 @@ export default function Edit() {
 
 	return (
 		<div { ...blockProps }>
-			<div className="wp-block-shm-poster-hover-content__label">
-				{ __( 'Hover Content', 'shm-blocks' ) }
-			</div>
 			<InnerBlocks
-				allowedBlocks={ ALLOWED_BLOCKS }
+				allowedBlocks={ ALLOWED_INNER_BLOCKS }
 				template={ TEMPLATE }
 				templateLock={ false }
 			/>
