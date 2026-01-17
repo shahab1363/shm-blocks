@@ -169,7 +169,18 @@
 
 // Animation: Slide (default) - height transition reveals content
 .wp-block-shm-poster--animation-slide {
-	// Default behavior - overlay height animates
+
+	.wp-block-shm-poster-hover-content {
+		opacity: 0;
+		transition: opacity var(--poster-transition-duration) var(--poster-transition-easing);
+	}
+
+	@include poster-active-state {
+
+		.wp-block-shm-poster-hover-content {
+			opacity: 1;
+		}
+	}
 }
 
 // Animation: Fade - full overlay fades in/out
