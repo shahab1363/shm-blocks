@@ -420,25 +420,36 @@
 // Content moves together with the overlay - no separate fade animation
 .wp-block-shm-poster--content-none {
 
-	// Position hover content at top of overlay
-	// so it slides up with the expanding overlay
+	// Hover content visible from start, no opacity transition
 	// stylelint-disable-next-line no-descending-specificity
 	.wp-block-shm-poster-content-hover {
-		justify-content: flex-start;
+		opacity: 1;
+		justify-content: center;
+		transition:
+			height var(--poster-transition-duration) var(--poster-transition-easing),
+			transform var(--poster-transition-duration) var(--poster-transition-easing);
 	}
 
-	// No opacity/transform transitions on children
+	// No opacity/transform transitions on children - they're visible immediately
 	// stylelint-disable-next-line no-descending-specificity
 	.wp-block-shm-poster-content-hover > * {
 		opacity: 1;
 		transform: none;
+		transition: none;
 	}
 
+	// Default content fades out instantly on hover
 	@include poster-active-state {
 
 		// stylelint-disable-next-line no-descending-specificity
+		.wp-block-shm-poster-content-default {
+			opacity: 0;
+			transition: opacity 0.1s ease-out;
+		}
+
+		// stylelint-disable-next-line no-descending-specificity
 		.wp-block-shm-poster-content-hover {
-			justify-content: flex-start;
+			justify-content: center;
 		}
 	}
 }
