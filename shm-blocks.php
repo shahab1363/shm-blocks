@@ -4,7 +4,7 @@
  * Description:       Custom WordPress Gutenberg blocks including the Poster block with hover effects.
  * Requires at least: 6.1
  * Requires PHP:      7.4
- * Version:           1.0.12
+ * Version:           1.0.13
  * Author:            SHM
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
