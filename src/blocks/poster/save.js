@@ -25,6 +25,7 @@ export default function save( { attributes } ) {
 		overlayPosition,
 		animationType,
 		contentAnimationType,
+		contentFadeEnabled,
 		focalPoint,
 	} = attributes;
 
@@ -36,7 +37,10 @@ export default function save( { attributes } ) {
 		`wp-block-shm-poster--animation-${ animationType }`,
 		`wp-block-shm-poster--content-${ contentAnimationType }`,
 		`wp-block-shm-poster--position-${ overlayPosition }`,
-	].join( ' ' );
+		! contentFadeEnabled && 'wp-block-shm-poster--no-content-fade',
+	]
+		.filter( Boolean )
+		.join( ' ' );
 
 	const blockProps = useBlockProps.save( {
 		className: classNames,
@@ -81,7 +85,9 @@ export default function save( { attributes } ) {
 		width: '100%',
 		height: '100%',
 		objectFit: 'cover',
-		objectPosition: `${ ( focalPoint?.x ?? 0.5 ) * 100 }% ${ ( focalPoint?.y ?? 0.5 ) * 100 }%`,
+		objectPosition: `${ ( focalPoint?.x ?? 0.5 ) * 100 }% ${
+			( focalPoint?.y ?? 0.5 ) * 100
+		}%`,
 	};
 
 	return (

@@ -416,6 +416,49 @@
 	}
 }
 
+// Content Animation: None (slide with overlay)
+// Content moves together with the overlay - no separate fade animation
+.wp-block-shm-poster--content-none {
+
+	// Position hover content at top of overlay
+	// so it slides up with the expanding overlay
+	// stylelint-disable-next-line no-descending-specificity
+	.wp-block-shm-poster-content-hover {
+		justify-content: flex-start;
+	}
+
+	// No opacity/transform transitions on children
+	// stylelint-disable-next-line no-descending-specificity
+	.wp-block-shm-poster-content-hover > * {
+		opacity: 1;
+		transform: none;
+	}
+
+	@include poster-active-state {
+
+		// stylelint-disable-next-line no-descending-specificity
+		.wp-block-shm-poster-content-hover {
+			justify-content: flex-start;
+		}
+	}
+}
+
+// No content fade modifier - hover content visible from start
+.wp-block-shm-poster--no-content-fade {
+
+	// stylelint-disable-next-line no-descending-specificity
+	.wp-block-shm-poster-content-hover {
+		opacity: 1;
+	}
+
+	// Children visible immediately, no opacity animation
+	// stylelint-disable-next-line no-descending-specificity
+	.wp-block-shm-poster-content-hover > * {
+		opacity: 1 !important;
+		transition: transform var(--poster-transition-duration) var(--poster-transition-easing) !important;
+	}
+}
+
 // Accessibility: Focus states
 .wp-block-shm-poster:has(.shm-poster__link:focus-visible) {
 

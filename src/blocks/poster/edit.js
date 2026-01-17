@@ -67,6 +67,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		overlayPosition,
 		animationType,
 		contentAnimationType,
+		contentFadeEnabled,
 	} = attributes;
 
 	const [ isLinkPopoverOpen, setIsLinkPopoverOpen ] = useState( false );
@@ -83,6 +84,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		`wp-block-shm-poster--animation-${ animationType }`,
 		`wp-block-shm-poster--content-${ contentAnimationType }`,
 		`wp-block-shm-poster--position-${ overlayPosition }`,
+		! contentFadeEnabled && 'wp-block-shm-poster--no-content-fade',
 		isDefaultState ? 'is-editing-default' : 'is-editing-hover',
 		isPreviewingHover && 'is-previewing-hover',
 	]
@@ -393,10 +395,26 @@ export default function Edit( { attributes, setAttributes } ) {
 							setAttributes( { contentAnimationType: value } )
 						}
 						help={ __(
-							'Animation style for content elements.',
+							'Animation style for content elements. "None" makes content slide with the overlay.',
 							'shm-blocks'
 						) }
 					/>
+					{ contentAnimationType !== 'none' && (
+						<ToggleControl
+							label={ __(
+								'Fade content on hover',
+								'shm-blocks'
+							) }
+							checked={ contentFadeEnabled }
+							onChange={ ( value ) =>
+								setAttributes( { contentFadeEnabled: value } )
+							}
+							help={ __(
+								'When disabled, hover content is visible immediately without fade animation.',
+								'shm-blocks'
+							) }
+						/>
+					) }
 					<RangeControl
 						label={ __( 'Transition Duration (ms)', 'shm-blocks' ) }
 						value={ attributes.transitionDuration }
@@ -465,7 +483,9 @@ export default function Edit( { attributes, setAttributes } ) {
 							width: '100%',
 							height: '100%',
 							objectFit: 'cover',
-							objectPosition: `${ ( focalPoint?.x ?? 0.5 ) * 100 }% ${ ( focalPoint?.y ?? 0.5 ) * 100 }%`,
+							objectPosition: `${
+								( focalPoint?.x ?? 0.5 ) * 100
+							}% ${ ( focalPoint?.y ?? 0.5 ) * 100 }%`,
 						} }
 					/>
 				) : (

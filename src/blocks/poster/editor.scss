@@ -106,6 +106,18 @@
 		}
 
 		@include editor-active-hover-state;
+
+		// Content none: keep content at flex-start
+		&.wp-block-shm-poster--content-none {
+
+			.wp-block-shm-poster-content-hover {
+				justify-content: flex-start;
+			}
+
+			.block-editor-block-list__layout {
+				justify-content: flex-start;
+			}
+		}
 	}
 
 	// Previewing hover state
@@ -126,11 +138,24 @@
 		&.wp-block-shm-poster--content-fade-up,
 		&.wp-block-shm-poster--content-fade,
 		&.wp-block-shm-poster--content-scale,
-		&.wp-block-shm-poster--content-stagger {
+		&.wp-block-shm-poster--content-stagger,
+		&.wp-block-shm-poster--content-none {
 
 			.wp-block-shm-poster-content-hover > * {
 				opacity: 1;
 				transform: none;
+			}
+		}
+
+		// Content none: keep content at flex-start in preview
+		&.wp-block-shm-poster--content-none {
+
+			.wp-block-shm-poster-content-hover {
+				justify-content: flex-start;
+			}
+
+			.block-editor-block-list__layout {
+				justify-content: flex-start;
 			}
 		}
 
