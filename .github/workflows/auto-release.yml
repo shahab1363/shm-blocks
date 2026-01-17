@@ -102,13 +102,8 @@ jobs:
                     exit 1
                   fi
 
-                  if [ ! -d "build/blocks/poster-content-default" ]; then
-                    echo "ERROR: Child block missing (build/blocks/poster-content-default)"
-                    exit 1
-                  fi
-
-                  if [ ! -d "build/blocks/poster-content-hover" ]; then
-                    echo "ERROR: Child block missing (build/blocks/poster-content-hover)"
+                  if [ ! -d "build/blocks/poster-hover-content" ]; then
+                    echo "ERROR: Child block missing (build/blocks/poster-hover-content)"
                     exit 1
                   fi
 
