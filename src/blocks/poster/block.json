@@ -68,22 +68,9 @@
 			"default": "slide",
 			"enum": [ "slide", "fade", "scale", "blur", "slide-fade" ]
 		},
-		"contentAnimationType": {
-			"type": "string",
-			"default": "fade-up",
-			"enum": [ "none", "fade-up", "fade", "scale", "stagger" ]
-		},
-		"contentFadeEnabled": {
-			"type": "boolean",
-			"default": true
-		},
 		"transitionDuration": {
 			"type": "number",
 			"default": 400
-		},
-		"contentAnimationDelay": {
-			"type": "number",
-			"default": 100
 		},
 		"transitionEasing": {
 			"type": "string",

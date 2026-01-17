@@ -24,61 +24,28 @@ export default function save( { attributes } ) {
 		linkRel,
 		overlayPosition,
 		animationType,
-		contentAnimationType,
-		contentFadeEnabled,
 		focalPoint,
 	} = attributes;
 
 	// Build CSS custom properties using shared utility
 	const customStyles = buildCustomStyles( attributes );
 
-	// Build class names
 	const classNames = [
 		`wp-block-shm-poster--animation-${ animationType }`,
-		`wp-block-shm-poster--content-${ contentAnimationType }`,
 		`wp-block-shm-poster--position-${ overlayPosition }`,
-		! contentFadeEnabled && 'wp-block-shm-poster--no-content-fade',
-	]
-		.filter( Boolean )
-		.join( ' ' );
+	].join( ' ' );
 
 	const blockProps = useBlockProps.save( {
 		className: classNames,
 		style: customStyles,
 	} );
 
-	// Overlay content wrapper
 	const overlayContent = (
-		<span className="shm-poster__overlays">
+		<span className="shm-poster__overlay">
 			<InnerBlocks.Content />
 		</span>
 	);
 
-	// Render link or non-interactive wrapper based on linkUrl
-	const renderWrapper = () => {
-		if ( linkUrl ) {
-			const linkProps = {
-				className: 'shm-poster__link',
-				href: linkUrl,
-			};
-
-			if ( linkTarget === '_blank' ) {
-				linkProps.target = '_blank';
-				linkProps.rel = linkRel || 'noopener noreferrer';
-			}
-
-			return <a { ...linkProps }>{ overlayContent }</a>;
-		}
-
-		// No link - use non-interactive div wrapper
-		return (
-			<div className="shm-poster__link" data-no-link="true">
-				{ overlayContent }
-			</div>
-		);
-	};
-
-	// Image styles - inline to ensure they work even if CSS fails to load
 	const imageStyles = {
 		position: 'absolute',
 		inset: 0,
@@ -89,6 +56,19 @@ export default function save( { attributes } ) {
 			( focalPoint?.y ?? 0.5 ) * 100
 		}%`,
 	};
+
+	const linkProps = linkUrl
+		? {
+				className: 'shm-poster__link',
+				href: linkUrl,
+				...( linkTarget === '_blank' && {
+					target: '_blank',
+					rel: linkRel || 'noopener noreferrer',
+				} ),
+		  }
+		: { className: 'shm-poster__link', 'data-no-link': 'true' };
+
+	const WrapperTag = linkUrl ? 'a' : 'div';
 
 	return (
 		<div { ...blockProps }>
@@ -101,7 +81,7 @@ export default function save( { attributes } ) {
 					style={ imageStyles }
 				/>
 			) }
-			{ renderWrapper() }
+			<WrapperTag { ...linkProps }>{ overlayContent }</WrapperTag>
 		</div>
 	);
 }

@@ -33,19 +33,36 @@ import { link, image } from '@wordpress/icons';
  */
 import { buildCustomStyles } from './utils';
 import {
+	ALLOWED_CONTENT_BLOCKS,
 	ANIMATION_TYPES,
-	CONTENT_ANIMATION_TYPES,
 	EASING_OPTIONS,
 	POSITION_OPTIONS,
 	ASPECT_RATIO_OPTIONS,
 } from './constants';
 
 /**
- * Template for inner blocks
+ * Template for inner blocks - default content + hover content wrapper
  */
 const TEMPLATE = [
-	[ 'shm/poster-content-default', {} ],
-	[ 'shm/poster-content-hover', {} ],
+	[
+		'core/heading',
+		{ level: 3, placeholder: __( 'Title\u2026', 'shm-blocks' ) },
+	],
+	[
+		'shm/poster-hover-content',
+		{},
+		[
+			[
+				'core/paragraph',
+				{
+					placeholder: __(
+						'Description shown on hover\u2026',
+						'shm-blocks'
+					),
+				},
+			],
+		],
+	],
 ];
 
 /**
@@ -66,26 +83,19 @@ export default function Edit( { attributes, setAttributes } ) {
 		linkTarget,
 		overlayPosition,
 		animationType,
-		contentAnimationType,
-		contentFadeEnabled,
 	} = attributes;
 
 	const [ isLinkPopoverOpen, setIsLinkPopoverOpen ] = useState( false );
 	const [ isPreviewingHover, setIsPreviewingHover ] = useState( false );
-	const [ editingState, setEditingState ] = useState( 'default' );
 
 	const linkButtonRef = useRef( null );
-	const isDefaultState = editingState === 'default';
 
 	const customStyles = buildCustomStyles( attributes );
 
 	const classNames = [
 		'wp-block-shm-poster',
 		`wp-block-shm-poster--animation-${ animationType }`,
-		`wp-block-shm-poster--content-${ contentAnimationType }`,
 		`wp-block-shm-poster--position-${ overlayPosition }`,
-		! contentFadeEnabled && 'wp-block-shm-poster--no-content-fade',
-		isDefaultState ? 'is-editing-default' : 'is-editing-hover',
 		isPreviewingHover && 'is-previewing-hover',
 	]
 		.filter( Boolean )
@@ -117,10 +127,6 @@ export default function Edit( { attributes, setAttributes } ) {
 		} );
 	}
 
-	function toggleEditingState() {
-		setEditingState( editingState === 'default' ? 'hover' : 'default' );
-	}
-
 	function clearLink() {
 		setAttributes( {
 			linkUrl: '',
@@ -141,27 +147,17 @@ export default function Edit( { attributes, setAttributes } ) {
 			<BlockControls>
 				<ToolbarGroup>
 					<ToolbarButton
-						icon={ isDefaultState ? 'visibility' : 'hidden' }
-						label={
-							isDefaultState
-								? __( 'Editing Default State', 'shm-blocks' )
-								: __( 'Editing Hover State', 'shm-blocks' )
-						}
-						onClick={ toggleEditingState }
-						isPressed={ ! isDefaultState }
-					>
-						{ isDefaultState
-							? __( 'Default', 'shm-blocks' )
-							: __( 'Hover', 'shm-blocks' ) }
-					</ToolbarButton>
-					<ToolbarButton
 						icon="controls-play"
 						label={ __( 'Preview Hover State', 'shm-blocks' ) }
 						onClick={ () =>
 							setIsPreviewingHover( ! isPreviewingHover )
 						}
 						isPressed={ isPreviewingHover }
-					/>
+					>
+						{ isPreviewingHover
+							? __( 'Previewing', 'shm-blocks' )
+							: __( 'Preview', 'shm-blocks' ) }
+					</ToolbarButton>
 				</ToolbarGroup>
 				<ToolbarGroup>
 					<MediaUploadCheck>
@@ -387,34 +383,6 @@ export default function Edit( { attributes, setAttributes } ) {
 							'shm-blocks'
 						) }
 					/>
-					<SelectControl
-						label={ __( 'Content Animation', 'shm-blocks' ) }
-						value={ contentAnimationType }
-						options={ CONTENT_ANIMATION_TYPES }
-						onChange={ ( value ) =>
-							setAttributes( { contentAnimationType: value } )
-						}
-						help={ __(
-							'Animation style for content elements. "None" makes content slide with the overlay.',
-							'shm-blocks'
-						) }
-					/>
-					{ contentAnimationType !== 'none' && (
-						<ToggleControl
-							label={ __(
-								'Fade content on hover',
-								'shm-blocks'
-							) }
-							checked={ contentFadeEnabled }
-							onChange={ ( value ) =>
-								setAttributes( { contentFadeEnabled: value } )
-							}
-							help={ __(
-								'When disabled, hover content is visible immediately without fade animation.',
-								'shm-blocks'
-							) }
-						/>
-					) }
 					<RangeControl
 						label={ __( 'Transition Duration (ms)', 'shm-blocks' ) }
 						value={ attributes.transitionDuration }
@@ -424,19 +392,6 @@ export default function Edit( { attributes, setAttributes } ) {
 						min={ 100 }
 						max={ 1000 }
 						step={ 50 }
-					/>
-					<RangeControl
-						label={ __(
-							'Content Animation Delay (ms)',
-							'shm-blocks'
-						) }
-						value={ attributes.contentAnimationDelay }
-						onChange={ ( value ) =>
-							setAttributes( { contentAnimationDelay: value } )
-						}
-						min={ 0 }
-						max={ 500 }
-						step={ 25 }
 					/>
 					<SelectControl
 						label={ __( 'Easing Function', 'shm-blocks' ) }
@@ -512,14 +467,11 @@ export default function Edit( { attributes, setAttributes } ) {
 					</div>
 				) }
 
-				<div className="shm-poster__overlay shm-poster__overlay--default">
+				<div className="shm-poster__overlay">
 					<InnerBlocks
+						allowedBlocks={ ALLOWED_CONTENT_BLOCKS }
 						template={ TEMPLATE }
-						templateLock="all"
-						allowedBlocks={ [
-							'shm/poster-content-default',
-							'shm/poster-content-hover',
-						] }
+						templateLock={ false }
 					/>
 				</div>
 			</div>

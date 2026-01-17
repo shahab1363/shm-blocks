@@ -1,0 +1,31 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "shm/poster-hover-content",
+  "version": "1.0.0",
+  "title": "Poster Hover Content",
+  "category": "media",
+  "description": "Content that appears when hovering over the poster.",
+  "parent": [
+    "shm/poster"
+  ],
+  "supports": {
+    "html": false,
+    "reusable": false,
+    "className": true,
+    "color": {
+      "background": false,
+      "text": true
+    },
+    "spacing": {
+      "padding": true,
+      "margin": false
+    },
+    "typography": {
+      "fontSize": true,
+      "lineHeight": true
+    }
+  },
+  "textdomain": "shm-blocks",
+  "editorScript": "file:./index.js"
+}

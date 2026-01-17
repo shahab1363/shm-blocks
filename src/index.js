@@ -5,5 +5,4 @@
  */
 
 import './blocks/poster';
-import './blocks/poster-content-default';
-import './blocks/poster-content-hover';
+import './blocks/poster-hover-content';
